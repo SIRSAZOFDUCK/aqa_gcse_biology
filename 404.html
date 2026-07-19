@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Page not found — AQA GCSE Biology Revision</title>
+  <style>
+    :root {
+      --paper: #eef2ef;
+      --dots: rgba(31, 122, 92, .10);
+      --card: #ffffff;
+      --ink: #16232c;
+      --ink-soft: #5b6f7c;
+      --line: #d5ddd7;
+      --algae: #1f7a5c;
+      --algae-dim: #dcece5;
+      --btn-text: #ffffff;
+      --shadow: 0 1px 0 rgba(22,35,44,.05), 0 14px 34px -24px rgba(22,35,44,.65);
+      --radius: 14px;
+    }
+    [data-theme="dark"] {
+      --paper: #101a20;
+      --dots: rgba(122, 196, 166, .10);
+      --card: #17242c;
+      --ink: #e6eeea;
+      --ink-soft: #9db0ba;
+      --line: #2b3d47;
+      --algae: #57bd95;
+      --algae-dim: #1c3a30;
+      --btn-text: #0d1519;
+      --shadow: 0 14px 34px -24px rgba(0,0,0,.95);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--paper);
+      background-image: radial-gradient(var(--dots) 1px, transparent 1px);
+      background-size: 22px 22px;
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            "Helvetica Neue", Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .display {
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+                   "Times New Roman", serif;
+    }
+    .card {
+      width: min(480px, 100%);
+      text-align: center;
+      padding: clamp(28px, 6vw, 44px);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 4px);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .brandmark {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: var(--algae);
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: var(--shadow);
+    }
+    .code {
+      margin: 0 0 6px;
+      color: var(--algae);
+      font-size: .8rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(1.6rem, 5vw, 2.1rem);
+      font-weight: 600;
+    }
+    p {
+      margin: 0 0 24px;
+      color: var(--ink-soft);
+    }
+    a.btn {
+      display: inline-block;
+      appearance: none;
+      text-decoration: none;
+      border: 1px solid var(--algae);
+      border-radius: 999px;
+      padding: 12px 26px;
+      background: var(--algae);
+      color: var(--btn-text);
+      font: inherit;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    a.btn:hover, a.btn:focus-visible { opacity: .92; outline: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brandmark display" aria-hidden="true">B</div>
+    <p class="code">404</p>
+    <h1 class="display">That page has wandered off.</h1>
+    <p>The link you followed doesn't match anything here. The topic list and your
+       progress are both still exactly where you left them.</p>
+    <a class="btn" href="index.html">Back to the topic list</a>
+  </div>
+</body>
+</html>
