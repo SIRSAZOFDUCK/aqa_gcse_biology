@@ -596,6 +596,70 @@
       background: var(--accent);
       transition: width .3s ease;
     }
+    /* ---- daily goal bar ---- */
+    .daily-bar {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+      padding: 16px 20px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--algae);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .daily-bar.done { border-left-color: var(--stain); }
+    .daily-bar .dc {
+      flex: none;
+      font-size: 2.1rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--algae);
+    }
+    .daily-bar.done .dc { color: var(--stain); }
+    .daily-bar .dl {
+      flex: 1;
+      min-width: 160px;
+      font-size: .85rem;
+      color: var(--ink-soft);
+    }
+    .daily-bar .dl strong {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-size: .95rem;
+    }
+    .daily-track {
+      height: 6px;
+      border-radius: 99px;
+      background: var(--line);
+      overflow: hidden;
+    }
+    .daily-track > div {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--algae);
+      transition: width .4s ease;
+    }
+    .daily-bar.done .daily-track > div { background: var(--stain); }
+    .daily-bar select {
+      flex: none;
+      font: inherit;
+      font-size: .82rem;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--card-2);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    @media (max-width: 680px) {
+      .daily-bar { gap: 14px; padding: 15px 16px; }
+      .daily-bar select { width: 100%; }
+    }
+
     .tprog-label {
       display: flex;
       justify-content: space-between;
@@ -768,6 +832,8 @@
                and pick up later &mdash; on this device or any other.</p>
           </div>
         </section>
+
+        <div id="dailyBar"></div>
 
         <div class="section-heading">
           <h2>Specification sections</h2>
@@ -1009,6 +1075,77 @@ async function submitPwChange(){
 
 async function signOut(){ await sb.auth.signOut(); location.reload(); }
 
+/* ===================== DAILY GOAL =====================
+   Mirrors the block in quiz.html. Set DAILY_GOAL to false in BOTH files to
+   switch the feature off completely.
+
+   The count is read out of the progress rows this page already fetches, so
+   this adds no extra request. Each topic keeps its own dailyLog; the bar sums
+   the ones stamped with today's date. */
+const DAILY_GOAL = true;
+const GOAL_KEY = 'gcsebio_daily_goal';
+const GOAL_DEFAULT = 20;
+
+/* Local date, not toISOString() — through BST, local midnight is 23:00 UTC the
+   previous day, so for the first hour of each day an ISO date still reports
+   yesterday. Must match todayStr() in quiz.html exactly. */
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' +
+         String(d.getMonth() + 1).padStart(2, '0') + '-' +
+         String(d.getDate()).padStart(2, '0');
+}
+function goalTarget(){
+  const v = parseInt(localStorage.getItem(GOAL_KEY), 10);
+  return (Number.isInteger(v) && v > 0) ? v : GOAL_DEFAULT;
+}
+function dailyTotal(rows){
+  const today = todayStr();
+  return (rows || []).reduce((sum, row) => {
+    const l = row.data && row.data.dailyLog;
+    return sum + (l && l.date === today ? (l.count || 0) : 0);
+  }, 0);
+}
+function renderGoalBar(rows){
+  const bar = document.getElementById('dailyBar');
+  if(!bar) return;
+  if(!DAILY_GOAL){ bar.innerHTML = ''; return; }
+
+  const count = dailyTotal(rows);
+  const target = goalTarget();
+  const done = count >= target;
+  const pct = Math.min(100, Math.round(count / target * 100));
+  const left = target - count;
+
+  const headline = done
+    ? 'Daily goal reached'
+    : (count === 0
+        ? 'Nothing answered yet today'
+        : left + ' more question' + (left === 1 ? '' : 's') + ' to reach today\u2019s goal');
+  const detail = done
+    ? count + ' question' + (count === 1 ? '' : 's') + ' answered today. Anything past this is a bonus.'
+    : count + ' of ' + target + ' answered today, across every topic.';
+
+  bar.innerHTML =
+    '<div class="daily-bar' + (done ? ' done' : '') + '">' +
+      '<div class="dc">' + count + '</div>' +
+      '<div class="dl"><strong>' + headline + '</strong>' + detail +
+        '<div class="daily-track"><div style="width:' + pct + '%"></div></div>' +
+      '</div>' +
+      '<select onchange="setGoal(this.value)" aria-label="Questions per day">' +
+        [10, 20, 30].map(n =>
+          '<option value="' + n + '"' + (n === target ? ' selected' : '') + '>' +
+          n + ' a day</option>').join('') +
+      '</select>' +
+    '</div>';
+}
+/* The rows are stashed so changing the target can redraw without refetching. */
+let goalRows = [];
+function setGoal(v){
+  localStorage.setItem(GOAL_KEY, v);
+  renderGoalBar(goalRows);
+}
+
 /* ===================== TOPIC GRID ===================== */
 const HUES = ['var(--algae)','var(--violet)','var(--iodine)','var(--stain)','#1c6d86'];
 const MAX_BOX = 3;   // must match the quiz engine's ladder height
@@ -1190,6 +1327,8 @@ async function boot(){
   (prog.data || []).forEach(r => { byUnit[r.unit] = r; });
   cat.data.forEach(t => { t._pct = masteryFor(byUnit[t.unit], t.question_count); });
 
+  goalRows = prog.data || [];
+  renderGoalBar(goalRows);
   render(cat.data, byUnit);
   show('topics');
 }

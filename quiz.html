@@ -227,6 +227,13 @@ select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:
 .arrow{font-size:calc(18px * var(--fs));font-weight:700}
 .up{color:var(--algae)} .down{color:var(--iodine)} .flat{color:var(--ink-soft)}
 .streakpill{font-size:calc(12px * var(--fs));font-weight:700;color:var(--stain);background:var(--stain-dim);border-radius:99px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--stain) 35%, var(--card))}
+/* daily goal */
+.goalpill{font-size:calc(12px * var(--fs));font-weight:700;color:var(--algae);background:var(--algae-dim);border-radius:99px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--algae) 35%, var(--card))}
+.goalpill.done{color:var(--stain);background:var(--stain-dim);border-color:color-mix(in srgb,var(--stain) 35%, var(--card))}
+.goalsum{margin-top:14px;font-size:calc(14px * var(--fs));color:var(--ink-soft)}
+.goalsum .track{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px;max-width:320px}
+.goalsum .track>div{height:100%;background:var(--algae);border-radius:99px;transition:width .4s ease}
+.goalsum .track.done>div{background:var(--stain)}
 .answerbox{border-left:3px solid var(--algae);background:var(--algae-dim);padding:14px 16px;border-radius:0 11px 11px 0;margin-top:16px}
 .answerbox h3{margin:0 0 8px;font-size:calc(11px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--algae)}
 .answerbox ul{margin:8px 0 0;padding-left:20px}
@@ -432,6 +439,7 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
         <span class="small muted" id="qCounter"></span>
         <span class="streakpill hidden" id="streakPill"></span>
+        <span class="goalpill hidden" id="goalPill"></span>
       </div>
       <div class="chips" id="qChips"></div>
       <figure class="figure hidden" id="qFigure"><div id="qFigureSvg"></div><figcaption id="qFigureCap"></figcaption></figure>
@@ -467,6 +475,7 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
       <h2>Session finished</h2>
       <div class="statgrid" id="sessionStats"></div>
       <div class="ladder" id="ladderSummary"></div>
+      <div class="goalsum hidden" id="goalSummary"></div>
       <div style="margin-top:18px" class="rowbtns">
         <button class="btn" onclick="showSetup()">Another session</button>
         <button class="btn ghost" onclick="showTab('progress')">See progress</button>
@@ -537,6 +546,124 @@ let BANK = null;      // the question bank, once fetched
 let SESSION = null;   // the signed-in user's session
 let UNIT = new URLSearchParams(location.search).get('unit') || null;
 let PREVIEW = new URLSearchParams(location.search).get('preview') === '1';
+
+/* ===================== DAILY GOAL =====================
+   One switch. Set DAILY_GOAL to false and every trace of the feature
+   disappears: no pill, no toast, no summary. Nothing else changes.
+
+   The count lives in progress.dailyLog, so it rides along with the existing
+   save/sync machinery and needs no database change. The target is a personal
+   preference rather than progress, so it stays in localStorage. */
+const DAILY_GOAL = true;
+const GOAL_KEY = 'gcsebio_daily_goal';
+const GOAL_DEFAULT = 20;
+
+/* Local date, deliberately not toISOString(). Through BST, local midnight is
+   23:00 UTC the previous day, so for the first hour of every day an ISO date
+   still reports yesterday. A session at 00:30 would be added to yesterday's
+   total instead of starting a fresh day. */
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' +
+         String(d.getMonth() + 1).padStart(2, '0') + '-' +
+         String(d.getDate()).padStart(2, '0');
+}
+function goalTarget(){
+  const v = parseInt(localStorage.getItem(GOAL_KEY), 10);
+  return (Number.isInteger(v) && v > 0) ? v : GOAL_DEFAULT;
+}
+/* The goal counts questions answered today across ALL topics, but progress is
+   stored one row per topic. So the current topic's count comes from the live
+   `progress` object, and the rest is fetched once on boot and held here.
+   Without this, 10 questions in one topic and 10 in another would count as
+   two separate lots of 10 and the goal would never be reached. */
+let goalOtherUnits = 0;
+
+/* Returns 0 rather than a stale number whenever the stored log is from an
+   earlier day, so a new day starts empty without needing a reset step. */
+function thisUnitCount(){
+  const log = progress && progress.dailyLog;
+  return (log && log.date === todayStr()) ? (log.count || 0) : 0;
+}
+function todayCount(){ return goalOtherUnits + thisUnitCount(); }
+
+/* Asking for one JSON sub-field returns 22 tiny dailyLog objects instead of 22
+   full question histories, which matters on a metered free tier. If the server
+   rejects that syntax it falls back to the whole column — slower, but correct.
+   Only if both fail does the total stay at 0, and then it merely under-counts
+   rather than breaking the page. */
+async function loadOtherUnitCounts(){
+  if(!DAILY_GOAL) return;
+  const today = todayStr();
+  const tally = (rows, pick) => rows.reduce((sum, row) => {
+    if(BANK && row.unit === BANK.unit) return sum;   // this unit is counted live
+    const l = pick(row);
+    return sum + (l && l.date === today ? (l.count || 0) : 0);
+  }, 0);
+  try{
+    const slim = await sb.from('progress').select('unit,log:data->dailyLog');
+    if(!slim.error && slim.data){
+      goalOtherUnits = tally(slim.data, r => r.log);
+      return;
+    }
+    const full = await sb.from('progress').select('unit,data');
+    if(!full.error && full.data)
+      goalOtherUnits = tally(full.data, r => r.data && r.data.dailyLog);
+  }catch(e){ /* leave at 0 */ }
+}
+/* A question can both reach mastered and cross the daily goal on the same
+   answer. celebrate() has already put its toast up by then, so rather than
+   replacing it — which reads as a flicker — this waits its turn. */
+function goalCelebrate(){
+  const show = () => {
+    const old = document.querySelector('.toast');
+    if(old) old.remove();
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.setAttribute('role', 'status');
+    t.innerHTML = '<span class="big">\u2691</span><span>Daily goal reached \u2014 ' +
+                  goalTarget() + ' questions today</span>';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  };
+  document.querySelector('.toast') ? setTimeout(show, 2700) : show();
+}
+/* Called from grade(), once per answered question, whatever the result. */
+function bumpDailyCount(){
+  if(!DAILY_GOAL) return;
+  const today = todayStr();
+  if(!progress.dailyLog || progress.dailyLog.date !== today)
+    progress.dailyLog = {date: today, count: 0, goalHit: false};
+  progress.dailyLog.count++;
+  if(!progress.dailyLog.goalHit && progress.dailyLog.count >= goalTarget()){
+    progress.dailyLog.goalHit = true;
+    goalCelebrate();
+  }
+}
+function updateGoalPill(){
+  const gp = document.getElementById('goalPill');
+  if(!gp) return;
+  if(!DAILY_GOAL){ gp.classList.add('hidden'); return; }
+  const count = todayCount(), target = goalTarget(), done = count >= target;
+  gp.textContent = done ? ('\u2691 ' + count + ' today') : (count + '/' + target + ' today');
+  gp.className = 'goalpill' + (done ? ' done' : '');
+}
+function renderGoalSummary(){
+  const el = document.getElementById('goalSummary');
+  if(!el) return;
+  if(!DAILY_GOAL){ el.classList.add('hidden'); return; }
+  const count = todayCount(), target = goalTarget();
+  const done = count >= target;
+  const pct = Math.min(100, Math.round(count / target * 100));
+  const left = target - count;
+  el.classList.remove('hidden');
+  el.innerHTML = (done
+      ? '<strong style="color:var(--stain)">Daily goal reached</strong> \u2014 ' +
+        count + ' question' + (count === 1 ? '' : 's') + ' answered today across all topics.'
+      : '<strong>' + count + ' of ' + target + '</strong> towards today\u2019s goal \u2014 ' +
+        left + ' more to go.') +
+    '<div class="track' + (done ? ' done' : '') + '"><div style="width:' + pct + '%"></div></div>';
+}
 
 /* The number in the corner badge. Set display_number in the bank to control it.
    Falls back to the leading digit of aqa_topic if the field is absent, which is
@@ -613,7 +740,8 @@ let progress = blankProgress();
 let session = null;
 function storeKey(){ return 'gcsebio_' + (BANK ? BANK.unit : 'none') + '_v1'; }
 function blankProgress(){
-  return {questions:{}, streak:0, bestStreak:0, sessions:0, updated:0};
+  return {questions:{}, streak:0, bestStreak:0, sessions:0, updated:0,
+          dailyLog:{date:'', count:0, goalHit:false}};
 }
 
 /* Progress lives in two places: localStorage, which is instant and works
@@ -896,6 +1024,7 @@ function renderQuestion(){
   const st = progress.streak || 0;
   pill.classList.toggle('hidden', st < 3);
   pill.textContent = `${st} in a row`;
+  updateGoalPill();
 
   const optWrap = document.getElementById('qOptions');
   const reveal = document.getElementById('revealArea');
@@ -1094,6 +1223,7 @@ function grade(result, fraction){
   else if(result === 'no') session.slipped++;   // back to the start, even if it was already there
   else session.held++;
   if(r.box >= MAX_BOX && boxBefore < MAX_BOX){ session.mastered++; celebrate(q); }
+  bumpDailyCount();   // every answered question counts, right or wrong
   save();
 
   session.history.push({q, result, shown: session.shown});
@@ -1161,6 +1291,7 @@ function endSession(){
   if(s.held) bits.push(`<div class="lad"><span class="arrow flat">■</span><div><b>${s.held}</b> <span class="small muted">held their place</span></div></div>`);
   if(s.mastered) bits.unshift(`<div class="lad" style="border-color:var(--algae)"><span class="arrow up">★</span><div><b>${s.mastered}</b> <span class="small muted">reached mastered</span></div></div>`);
   lad.innerHTML = bits.join('');
+  renderGoalSummary();
 
   const missedQs = s.missed.slice();
   document.getElementById('redoBtn').onclick = () => startSessionWith(missedQs.slice().sort(() => Math.random() - 0.5));
@@ -1499,6 +1630,7 @@ async function boot(){
   if(!BANK){ showTopics(); return; }
 
   await loadProgress();
+  await loadOtherUnitCounts();
   startApp();
 }
 
