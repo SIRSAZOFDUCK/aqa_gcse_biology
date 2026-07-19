@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AQA GCSE Biology revision</title>
+<title>Retrieve GCSE</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.ico" sizes="48x48">
@@ -301,7 +301,7 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
   <header>
     <div class="topicmark display" id="topicMark" aria-hidden="true"></div>
     <div>
-      <h1 id="unitTitle">GCSE Biology</h1>
+      <h1 id="unitTitle">Retrieve GCSE</h1>
       <div class="sub" id="unitSub">Revision quizzes and notes</div>
     </div>
     <div class="hdrtools">
@@ -1516,11 +1516,10 @@ function startApp(){
   document.getElementById('topicsBtn').style.display = '';
   ['loading','auth','locked','topics'].forEach(v =>
     document.getElementById('view-' + v).classList.add('hidden'));
-  document.title = BANK.unit_title + ' — AQA GCSE Biology revision';
-  document.getElementById('unitSub').textContent = 'AQA GCSE Biology 8461';
+  document.title = BANK.unit_title + ' — Retrieve GCSE';
+  document.getElementById('unitSub').textContent = 'Retrieve GCSE · AQA Biology 8461';
   document.getElementById('topicMark').textContent = badgeNumber();
   document.getElementById('unitTitle').textContent = BANK.unit_title;
-  document.getElementById('unitSub').textContent = 'AQA GCSE Biology 8461';
   const range = specRange();
   const label = /^[\d.]+$/.test(range) ? `AQA ${range}` : range;
   document.getElementById('footNote').textContent =
