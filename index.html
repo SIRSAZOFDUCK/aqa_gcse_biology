@@ -3,8 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="AQA GCSE Biology revision quizzes and notes.">
-  <title>AQA GCSE Biology Revision</title>
+  <meta name="description" content="Free interactive revision quizzes and notes covering every topic in AQA GCSE Biology (8461), for Foundation and Higher tier. Try a topic instantly, no sign-up needed.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AQA GCSE Biology Revision">
+  <meta property="og:title" content="AQA GCSE Biology Revision — free interactive quizzes">
+  <meta property="og:description" content="Every topic in AQA GCSE Biology (8461), with instant marking, spaced repetition and revision notes. Try a topic free, no sign-up needed.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AQA GCSE Biology Revision">
+  <meta name="twitter:description" content="Free interactive quizzes covering every topic in AQA GCSE Biology (8461). Try a topic instantly.">
+  <title>AQA GCSE Biology Revision — free interactive quizzes</title>
   <style>
     :root {
       --paper: #eef2ef;
@@ -669,6 +676,54 @@
       background: color-mix(in srgb, var(--algae) 16%, var(--card));
       color: var(--algae);
     }
+
+    /* ---- change-password modal ---- */
+    .rowbtns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 16, 20, .55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+    .modal-overlay.hidden {
+      display: none;
+    }
+    .modal {
+      width: min(400px, 100%);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+    .modal h3 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+    .modal .notice {
+      min-height: 1.2em;
+    }
+
+    /* ---- locked topic card, shown to signed-out visitors ---- */
+    .topic-card.locked {
+      opacity: .7;
+    }
+    .topic-card.locked:hover,
+    .topic-card.locked:focus-visible {
+      opacity: 1;
+    }
+    .topic-card.locked .launch {
+      color: var(--ink-soft);
+    }
 </style>
 </head>
 
@@ -682,7 +737,7 @@
       </div>
       <div class="header-tools">
         <button class="theme-btn" id="themeBtn" type="button" onclick="toggleTheme()">Dark mode</button>
-        <button class="theme-btn" id="changePassBtn" type="button" onclick="changePassword(event)" style="display:none">Change password</button>
+        <button class="theme-btn" id="changePassBtn" type="button" onclick="openPwModal(event)" style="display:none">Change password</button>
         <button class="theme-btn" id="signOutBtn" type="button" onclick="signOut()" style="display:none">Sign out</button>
       </div>
     </header>
@@ -690,6 +745,25 @@
     <main>
       <section id="v-loading">
         <div class="hero"><div class="hero-copy"><p>Loading&hellip;</p></div></div>
+      </section>
+
+      <!-- ============ TOPICS ============ -->
+      <section id="v-topics" style="display:none">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Biology 8461</p>
+            <h2 class="display">Choose a topic and start revising.</h2>
+            <p id="topicsIntro">Each topic has interactive questions, full mark schemes and revision notes.
+               Your progress saves itself against your account, so you can stop mid-session
+               and pick up later &mdash; on this device or any other.</p>
+          </div>
+        </section>
+
+        <div class="section-heading">
+          <h2>Specification sections</h2>
+          <span id="topicCount"></span>
+        </div>
+        <div id="sections"></div>
       </section>
 
       <!-- ============ SIGN IN ============ -->
@@ -730,39 +804,42 @@
         <div class="hero">
           <div class="hero-copy">
             <p class="eyebrow">Almost there</p>
-            <h2 class="display">No access yet.</h2>
-            <p>You're signed in as <strong id="lockedEmail"></strong>, but this account
-               doesn't have access to the questions yet. If you've just paid, give it a
-               few minutes and check again.</p>
+            <h2 class="display">Setting up your account.</h2>
+            <p>You're signed in as <strong id="lockedEmail"></strong>, but your account
+               isn't quite ready yet. This is usually just a short delay right after
+               signing up — wait a moment and check again below.</p>
             <button class="theme-btn" onclick="location.reload()" style="margin-top:18px">Check again</button>
           </div>
         </div>
       </section>
-
-      <!-- ============ TOPICS ============ -->
-      <section id="v-topics" style="display:none">
-        <section class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">Biology 8461</p>
-            <h2 class="display">Choose a topic and start revising.</h2>
-            <p>Each topic has interactive questions, full mark schemes and revision notes.
-               Your progress saves itself against your account, so you can stop mid-session
-               and pick up later &mdash; on this device or any other.</p>
-          </div>
-        </section>
-
-        <div class="section-heading">
-          <h2>Specification sections</h2>
-          <span id="topicCount"></span>
-        </div>
-        <div id="sections"></div>
-      </section>
     </main>
+
+    <!-- ============ CHANGE PASSWORD ============ -->
+    <div class="modal-overlay hidden" id="pwModal" onclick="if(event.target === this) closePwModal()">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pwModalTitle">
+        <h3 id="pwModalTitle" class="display">Change password</h3>
+        <div class="pwfield" style="margin-top:14px">
+          <input type="password" id="pwNew" placeholder="New password"
+                 autocomplete="new-password" class="fld">
+          <button type="button" class="pw-toggle" onclick="togglePw('pwNew', this)">Show</button>
+        </div>
+        <div class="pwfield">
+          <input type="password" id="pwConfirm" placeholder="Confirm new password"
+                 autocomplete="new-password" class="fld">
+          <button type="button" class="pw-toggle" onclick="togglePw('pwConfirm', this)">Show</button>
+        </div>
+        <p class="notice" id="pwStatus"></p>
+        <div class="rowbtns">
+          <button class="theme-btn primary" id="pwSaveBtn" onclick="submitPwChange()">Save password</button>
+          <button class="theme-btn" type="button" onclick="closePwModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
 
     <footer id="foot">AQA GCSE Biology revision resources</footer>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.7"></script>
 <script>
 /* ---- fill these in; both are safe to publish ---- */
 const SUPABASE_URL = 'https://eicnlfyrlxhpaulysrwj.supabase.co';
@@ -787,8 +864,10 @@ function toggleTheme(){
 })();
 
 function show(v){
-  ['loading','auth','locked','topics'].forEach(x =>
-    document.getElementById('v-' + x).style.display = x === v ? '' : 'none');
+  ['loading','auth','locked','topics'].forEach(x => {
+    const on = v === 'browse' ? (x === 'auth' || x === 'topics') : (x === v);
+    document.getElementById('v-' + x).style.display = on ? '' : 'none';
+  });
   const signedIn = (v === 'locked' || v === 'topics');
   document.getElementById('signOutBtn').style.display = signedIn ? '' : 'none';
   document.getElementById('changePassBtn').style.display = signedIn ? '' : 'none';
@@ -888,14 +967,34 @@ async function emailLink(e){
             : 'Check your email — the link signs you in. It may be in your spam folder.');
 }
 
-async function changePassword(e){
-  e.preventDefault();
-  const p1 = prompt('New password (at least 8 characters):');
-  if(p1 === null) return;
-  if(p1.length < 8) return alert('Too short — use at least 8 characters.');
-  if(p1 !== prompt('Type it once more to confirm:')) return alert('They did not match.');
+function openPwModal(e){
+  if(e) e.preventDefault();
+  document.getElementById('pwNew').value = '';
+  document.getElementById('pwConfirm').value = '';
+  document.getElementById('pwNew').type = 'password';
+  document.getElementById('pwConfirm').type = 'password';
+  document.querySelectorAll('#pwModal .pw-toggle').forEach(b => b.textContent = 'Show');
+  document.getElementById('pwStatus').textContent = '';
+  document.getElementById('pwModal').classList.remove('hidden');
+  document.getElementById('pwNew').focus();
+}
+function closePwModal(){
+  document.getElementById('pwModal').classList.add('hidden');
+}
+async function submitPwChange(){
+  const p1 = document.getElementById('pwNew').value;
+  const p2 = document.getElementById('pwConfirm').value;
+  const status = document.getElementById('pwStatus');
+  if(p1.length < 8) return status.textContent = 'Use at least 8 characters.';
+  if(p1 !== p2) return status.textContent = 'The two passwords do not match.';
+  const btn = document.getElementById('pwSaveBtn');
+  btn.disabled = true;
+  status.textContent = 'Saving\u2026';
   const { error } = await sb.auth.updateUser({ password: p1 });
-  alert(error ? ('Could not change it: ' + error.message) : 'Password changed.');
+  btn.disabled = false;
+  if(error){ status.textContent = 'Could not change it: ' + error.message; return; }
+  status.textContent = 'Password changed.';
+  setTimeout(closePwModal, 1200);
 }
 
 async function signOut(){ await sb.auth.signOut(); location.reload(); }
@@ -915,26 +1014,42 @@ function masteryFor(row, questionCount){
   return Math.min(100, Math.round(total / (questionCount * MAX_BOX) * 100));
 }
 
-function card(t, accent, pct){
+function card(t, accent, pct, opts){
+  opts = opts || {};
+  const free = opts.anon && t.unit === opts.freeUnit;
+  const locked = opts.anon && !free;
   const a = document.createElement('a');
-  a.className = 'topic-card';
+  a.className = 'topic-card' + (locked ? ' locked' : '');
   a.style.setProperty('--accent', accent);
-  a.href = 'quiz.html?unit=' + encodeURIComponent(t.unit);
+  if(locked){
+    a.href = '#authEmail';
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('v-auth').scrollIntoView({behavior:'smooth', block:'start'});
+      document.getElementById('authEmail').focus();
+    });
+  } else if(free){
+    a.href = 'quiz.html?unit=' + encodeURIComponent(t.unit) + '&preview=1';
+  } else {
+    a.href = 'quiz.html?unit=' + encodeURIComponent(t.unit);
+  }
+  const progressBlock = locked ? '' : `
+    <div class="tprog">
+      <div class="tprog-bar"><div style="width:${pct}%"></div></div>
+      <div class="tprog-label">
+        <span>${free ? 'Free preview' : (pct > 0 ? pct + '% mastered' : 'Not started')}</span>
+        <span>${t.question_count} questions</span>
+      </div>
+    </div>`;
+  const launchLabel = locked ? 'Sign in to unlock' : (free ? 'Try it free — no sign-up' : (pct > 0 ? 'Carry on' : 'Start'));
   a.innerHTML = `
     <div class="topic-title-row">
       <div class="topic-number">${t.display_number}</div>
       <h4 class="display">${esc(t.unit_title)}</h4>
     </div>
-    <p>${esc(t.blurb || '')}</p>
-    <div class="tprog">
-      <div class="tprog-bar"><div style="width:${pct}%"></div></div>
-      <div class="tprog-label">
-        <span>${pct > 0 ? pct + '% mastered' : 'Not started'}</span>
-        <span>${t.question_count} questions</span>
-      </div>
-    </div>
+    <p>${esc(t.blurb || '')}</p>${progressBlock}
     <div class="launch">
-      <span>${pct > 0 ? 'Carry on' : 'Start'}</span>
+      <span>${launchLabel}</span>
       <span class="launch-arrow" aria-hidden="true">&rarr;</span>
     </div>`;
   return a;
@@ -947,7 +1062,8 @@ function progressClass(pct){
   return 'p-high';
 }
 
-function render(topics, progressByUnit){
+function render(topics, progressByUnit, opts){
+  opts = opts || {};
   document.getElementById('topicCount').textContent = topics.length + ' quizzes available';
 
   /* Group by AQA section. Matching is done on a normalised key so that two
@@ -967,17 +1083,22 @@ function render(topics, progressByUnit){
     const accent = HUES[gi % HUES.length];
     const sec = document.createElement('section');
     sec.className = 'syllabus-section';
-    sec.dataset.open = 'false';
+    // In anon-browse mode, open the first section by default so the free
+    // topic is visible without an extra click.
+    const startOpen = opts.anon && gi === 0;
+    sec.dataset.open = startOpen ? 'true' : 'false';
     sec.style.setProperty('--section-accent', accent);
     const num = (g.label.match(/^\d+/) || [''])[0];
     const name = g.label.replace(/^\d+\.\s*/, '');
     const done = g.items.reduce((s, t) => s + (t._pct || 0), 0) / g.items.length;
+    const progressBadge = opts.anon ? '' :
+      `<span class="syllabus-progress ${progressClass(Math.round(done))}">${Math.round(done)}% mastered</span>`;
     sec.innerHTML = `
-      <button class="syllabus-toggle" aria-expanded="false">
+      <button class="syllabus-toggle" aria-expanded="${startOpen}">
         <div class="syllabus-number">${num || '&bull;'}</div>
         <div class="syllabus-toggle-text">
           <h3 class="display">${esc(name)}</h3>
-          <span class="syllabus-progress ${progressClass(Math.round(done))}">${Math.round(done)}% mastered</span>
+          ${progressBadge}
         </div>
         <span class="syllabus-count">${g.items.length} quiz${g.items.length > 1 ? 'zes' : ''}</span>
         <span class="syllabus-chevron" aria-hidden="true">&#9662;</span>
@@ -989,7 +1110,7 @@ function render(topics, progressByUnit){
     /* The first card in a section takes the section's own colour, then the
        rest continue round the cycle from there. */
     g.items.forEach((t, i) => grid.appendChild(
-      card(t, HUES[(gi + i) % HUES.length], t._pct || 0)));
+      card(t, HUES[(gi + i) % HUES.length], t._pct || 0, opts)));
     sec.querySelector('.syllabus-toggle').addEventListener('click', () => {
       const open = sec.dataset.open === 'true';
       sec.dataset.open = open ? 'false' : 'true';
@@ -1000,17 +1121,42 @@ function render(topics, progressByUnit){
 
   const qs = topics.reduce((t, x) => t + x.question_count, 0);
   const ms = topics.reduce((t, x) => t + x.mark_total, 0);
-  const overall = topics.length
-    ? Math.round(topics.reduce((s, t) => s + (t._pct || 0), 0) / topics.length) : 0;
-  document.getElementById('foot').textContent =
-    `${topics.length} topics · ${qs} questions · ${ms} marks · ${overall}% mastered overall`;
+  if(opts.anon){
+    document.getElementById('foot').textContent =
+      `${topics.length} topics · ${qs} questions · ${ms} marks · sign in to track your mastery`;
+  } else {
+    const overall = topics.length
+      ? Math.round(topics.reduce((s, t) => s + (t._pct || 0), 0) / topics.length) : 0;
+    document.getElementById('foot').textContent =
+      `${topics.length} topics · ${qs} questions · ${ms} marks · ${overall}% mastered overall`;
+  }
 }
 
 /* ===================== BOOT ===================== */
 async function boot(){
   show('loading');
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ show('auth'); return; }
+
+  if(!session){
+    const { data, error } = await sb.from('catalog').select('*').order('sort_order');
+    if(error || !data || !data.length){
+      document.getElementById('sections').innerHTML =
+        '<div class="info-card">Could not load the topic list. Try reloading.</div>';
+      show('browse');
+      return;
+    }
+    const freeUnit = data[0].unit;
+    data.forEach(t => { t._pct = 0; });
+    document.getElementById('topicsIntro').textContent =
+      'Try the first topic free below, no account needed. Sign in or create a free ' +
+      'account to unlock the rest and save your progress as you go.';
+    document.getElementById('authHeading').textContent = 'Unlock all 22 topics.';
+    document.getElementById('authIntro').textContent =
+      'Create a free account to save your progress, or sign in if you already have one.';
+    render(data, {}, {anon: true, freeUnit});
+    show('browse');
+    return;
+  }
 
   const { data: profile } = await sb.from('profiles').select('has_access').maybeSingle();
   if(!profile || !profile.has_access){
@@ -1039,6 +1185,9 @@ async function boot(){
 }
 sb.auth.onAuthStateChange(e => { if(e === 'SIGNED_IN') boot(); });
 document.addEventListener('keydown', e => {
+  const modalOpen = !document.getElementById('pwModal').classList.contains('hidden');
+  if(modalOpen && e.key === 'Escape'){ closePwModal(); return; }
+  if(modalOpen && e.key === 'Enter'){ submitPwChange(); return; }
   if(e.key === 'Enter' && document.getElementById('v-auth').style.display !== 'none') submitAuth();
 });
 boot();

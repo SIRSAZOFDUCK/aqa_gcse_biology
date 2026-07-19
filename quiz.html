@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AQA GCSE Biology revision</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="robots" content="noindex">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.7"></script>
 <style>
 :root{
   --paper:#eef2ef;
@@ -91,6 +92,13 @@ h1{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:calc(28px * va
 .themeBtn:hover{color:var(--ink);border-color:var(--ink-soft)}
 .themeBtn.signout{border-color:var(--violet);color:var(--violet)}
 .themeBtn.signout:hover{background:color-mix(in srgb,var(--violet) 14%, var(--card));color:var(--violet);border-color:var(--violet)}
+.previewbanner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  margin:0 0 16px;padding:12px 16px;border-radius:11px;
+  background:color-mix(in srgb, var(--violet) 12%, var(--card));
+  border:1px solid color-mix(in srgb, var(--violet) 35%, var(--card));
+  font-size:calc(13px * var(--fs));color:var(--ink)}
+.previewbanner .btn{flex:none;background:var(--violet);border-color:var(--violet);color:#fff;
+  padding:8px 16px;border-radius:99px;text-decoration:none;font-weight:700;font-size:calc(13px * var(--fs))}
 
 nav{display:flex;gap:4px;margin:20px 0 18px;border-bottom:1px solid var(--line)}
 nav button{
@@ -220,6 +228,12 @@ select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:
 .answerbox li{margin-bottom:5px}
 .answerbox .lead{font-weight:600;margin:0}
 .answerbox .tail{margin:10px 0 0;font-size:calc(13px * var(--fs));font-style:italic;color:var(--ink-soft)}
+.youranswer{border-left:3px solid var(--violet);background:color-mix(in srgb, var(--violet) 10%, var(--card));padding:14px 16px;border-radius:0 11px 11px 0;margin-top:16px}
+.youranswer h3{margin:0 0 8px;font-size:calc(11px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--violet)}
+.youranswer p{margin:0;white-space:pre-wrap;font-size:calc(14px * var(--fs))}
+.answerinput{width:100%;font:inherit;font-size:calc(14px * var(--fs));padding:11px 12px;border:1px solid var(--line);
+  border-radius:9px;background:var(--card);color:var(--ink);resize:vertical;min-height:74px}
+.answerinput:focus-visible{outline:2px solid var(--violet);outline-offset:1px}
 .note{border-left:3px solid var(--stain);background:var(--stain-dim);padding:14px 16px;border-radius:0 11px 11px 0;margin-top:10px}
 .note h3{margin:0 0 6px;font-size:calc(11px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--stain)}
 .grade{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
@@ -297,6 +311,11 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
     </div>
   </header>
 
+  <div class="previewbanner hidden" id="previewBanner">
+    <span>You're trying this topic free, with no account. Sign up to unlock all 22 topics and save your progress.</span>
+    <a class="btn" href="index.html">Create a free account</a>
+  </div>
+
   <nav role="tablist">
     <button role="tab" id="tab-quiz" aria-selected="true" onclick="showTab('quiz')">Quiz</button>
     <button role="tab" id="tab-notes" aria-selected="false" onclick="showTab('notes')">Notes</button>
@@ -328,11 +347,12 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
 
   <section id="view-locked" class="hidden">
     <div class="card">
-      <h2>No access yet</h2>
-      <p class="small">You're signed in as <strong id="lockedEmail"></strong>, but this
-        account doesn't have access to the questions yet.</p>
-      <p class="small" style="margin-bottom:0">If you've just paid, it can take a few
-        minutes. Otherwise, get in touch and we'll sort it out.</p>
+      <h2>Setting up your account</h2>
+      <p class="small">You're signed in as <strong id="lockedEmail"></strong>, but your
+        account isn't quite ready yet.</p>
+      <p class="small" style="margin-bottom:0">This is usually just a short delay right
+        after signing up. Wait a moment and check again — if it's still like this later,
+        get in touch and we'll sort it out.</p>
       <div class="rowbtns" style="margin-top:14px">
         <button class="btn ghost" onclick="signOut()">Sign out</button>
         <button class="btn ghost" onclick="location.reload()">Check again</button>
@@ -414,6 +434,10 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
       <div class="options" id="qOptions"></div>
       <div id="revealArea"></div>
       <div id="afterArea" class="hidden">
+        <div class="youranswer hidden" id="yourAnswerBox">
+          <h3>What you wrote</h3>
+          <p id="yourAnswerText"></p>
+        </div>
         <div class="answerbox">
           <h3>Mark scheme</h3>
           <div id="qAnswer"></div>
@@ -507,6 +531,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let BANK = null;      // the question bank, once fetched
 let SESSION = null;   // the signed-in user's session
 let UNIT = new URLSearchParams(location.search).get('unit') || null;
+let PREVIEW = new URLSearchParams(location.search).get('preview') === '1';
 
 /* The number in the corner badge. Set display_number in the bank to control it.
    Falls back to the leading digit of aqa_topic if the field is absent, which is
@@ -889,9 +914,11 @@ function renderQuestion(){
       b.innerHTML = optionHtml(q, opt, idx);
       optWrap.appendChild(b);
     });
-    reveal.innerHTML = `<p class="small muted">Write or say your answer, then check it against the mark scheme.</p>`;
+    reveal.innerHTML = `<label class="small muted" for="writtenAnswer" style="display:block;margin-bottom:6px">Write or say your answer, then check it against the mark scheme.</label>
+      <textarea id="writtenAnswer" class="answerinput" rows="3" placeholder="Enter your answer if you wish to"></textarea>`;
     const b = document.createElement('button');
     b.className = 'btn';
+    b.style.marginTop = '12px';
     b.textContent = 'Show mark scheme';
     b.onclick = () => revealAnswer(false);
     reveal.appendChild(b);
@@ -965,7 +992,9 @@ function scrollToActions(){
 
 function revealAnswer(skipped){
   const q = session.list[session.i];
-  showAfter(q);
+  const box = document.getElementById('writtenAnswer');
+  const written = box ? box.value.trim() : '';
+  showAfter(q, written);
   document.getElementById('revealArea').innerHTML = '';
   const g = document.getElementById('gradeArea');
 
@@ -1013,13 +1042,18 @@ function revealAnswer(skipped){
   scrollToActions();
 }
 
-function showAfter(q){
+function showAfter(q, written){
   document.getElementById('qAnswer').innerHTML = answerHtml(q);
   const noteBox = document.getElementById('qNoteBox');
   if(q.explanatory_note){
     document.getElementById('qNote').textContent = q.explanatory_note;
     noteBox.classList.remove('hidden');
   } else noteBox.classList.add('hidden');
+  const yourBox = document.getElementById('yourAnswerBox');
+  if(written){
+    document.getElementById('yourAnswerText').textContent = written;
+    yourBox.classList.remove('hidden');
+  } else yourBox.classList.add('hidden');
   document.getElementById('afterArea').classList.remove('hidden');
 }
 
@@ -1427,6 +1461,18 @@ async function boot(){
 
   const { data: { session: s } } = await sb.auth.getSession();
   SESSION = s;
+
+  if(PREVIEW && !SESSION){
+    // No account needed for a preview — RLS only allows the anon key to read
+    // the one topic this is meant for, so anything else quietly fails below.
+    if(!UNIT){ location.href = 'index.html'; return; }
+    try{ BANK = await fetchBank(UNIT); }catch(e){ BANK = null; }
+    if(!BANK){ location.href = 'index.html'; return; }
+    progress = blankProgress();
+    startApp();
+    return;
+  }
+
   // Sign-in lives on the landing page, so there is one login screen, not two.
   if(!SESSION){ location.href = 'index.html'; return; }
 
@@ -1461,7 +1507,7 @@ function startApp(){
   selected = new Set(subtopicIds);
   noteRef = subtopicIds[0];
   document.querySelector('nav').style.display = '';
-  document.getElementById('signOutBtn').style.display = '';
+  document.getElementById('signOutBtn').style.display = (typeof PREVIEW !== 'undefined' && PREVIEW) ? 'none' : '';
   document.getElementById('topicsBtn').style.display = '';
   ['loading','auth','locked','topics'].forEach(v =>
     document.getElementById('view-' + v).classList.add('hidden'));
@@ -1475,6 +1521,15 @@ function startApp(){
   document.getElementById('footNote').textContent =
     `${BANK.questions.length} questions · ${BANK.questions.reduce((t,q)=>t+q.marks,0)} marks · ${label}`;
   ['tierSel','lenSel','modeSel'].forEach(id => document.getElementById(id).addEventListener('change', updatePoolInfo));
+  if(typeof PREVIEW !== 'undefined' && PREVIEW){
+    const banner = document.getElementById('previewBanner');
+    if(banner) banner.classList.remove('hidden');
+    const lenSel = document.getElementById('lenSel');
+    if(lenSel){
+      [...lenSel.options].forEach(o => { if(o.value === '0' || parseInt(o.value, 10) > 10) o.disabled = true; });
+      lenSel.value = '10';
+    }
+  }
   applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
   applyZoom();
   drawLegend('legend1');
