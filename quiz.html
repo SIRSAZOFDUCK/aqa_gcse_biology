@@ -89,6 +89,8 @@ h1{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:calc(28px * va
   border-radius:99px;padding:8px 14px;display:flex;align-items:center;gap:7px;
 }
 .themeBtn:hover{color:var(--ink);border-color:var(--ink-soft)}
+.themeBtn.signout{border-color:var(--violet);color:var(--violet)}
+.themeBtn.signout:hover{background:color-mix(in srgb,var(--violet) 14%, var(--card));color:var(--violet);border-color:var(--violet)}
 
 nav{display:flex;gap:4px;margin:20px 0 18px;border-bottom:1px solid var(--line)}
 nav button{
@@ -289,9 +291,9 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
         <span class="sep"></span>
         <button class="a-lg" id="zoomIn" onclick="stepZoom(1)" title="Bigger text" aria-label="Bigger text">A</button>
       </div>
-      <button class="themeBtn" id="topicsBtn" onclick="showTopics()" style="display:none">All topics</button>
+      <button class="themeBtn" id="topicsBtn" onclick="showTopics()" style="display:none">Go back to all topics</button>
       <button class="themeBtn" id="themeBtn" onclick="toggleTheme()">Dark mode</button>
-      <button class="themeBtn" id="signOutBtn" onclick="signOut()" style="display:none">Sign out</button>
+      <button class="themeBtn signout" id="signOutBtn" onclick="signOut()" style="display:none">Sign out</button>
     </div>
   </header>
 

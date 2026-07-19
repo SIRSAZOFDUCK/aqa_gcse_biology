@@ -547,6 +547,7 @@
       }
     }
   
+    
     /* ---- added: sign-in fields, and per-topic progress ---- */
     .fld {
       width: 100%;
@@ -592,6 +593,82 @@
       font-weight: 600;
       color: var(--ink-soft);
     }
+
+    /* ---- show/hide password ---- */
+    .pwfield {
+      position: relative;
+      margin-top: 10px;
+    }
+    .pwfield .fld {
+      padding-right: 52px;
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      appearance: none;
+      border: 0;
+      background: none;
+      color: var(--ink-soft);
+      font: inherit;
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 7px 9px;
+      border-radius: 8px;
+    }
+    .pw-toggle:hover,
+    .pw-toggle:focus-visible {
+      color: var(--ink);
+      background: var(--card-2);
+      outline: none;
+    }
+
+    /* ---- bigger, more visible expand/collapse chevron ---- */
+    .syllabus-chevron {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: var(--card-2);
+      color: var(--ink);
+      font-size: 1.3rem;
+    }
+    .syllabus-toggle:hover .syllabus-chevron {
+      background: var(--line);
+    }
+
+    /* ---- section (unit) progress badge, next to the section name ---- */
+    .syllabus-toggle-text {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .syllabus-progress {
+      flex: none;
+      font-size: .76rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .syllabus-progress.p-zero {
+      background: color-mix(in srgb, var(--ink-soft) 12%, var(--card));
+      color: var(--ink-soft);
+    }
+    .syllabus-progress.p-low {
+      background: color-mix(in srgb, var(--iodine) 16%, var(--card));
+      color: var(--iodine);
+    }
+    .syllabus-progress.p-mid {
+      background: color-mix(in srgb, var(--stain) 20%, var(--card));
+      color: var(--stain);
+    }
+    .syllabus-progress.p-high {
+      background: color-mix(in srgb, var(--algae) 16%, var(--card));
+      color: var(--algae);
+    }
 </style>
 </head>
 
@@ -605,6 +682,7 @@
       </div>
       <div class="header-tools">
         <button class="theme-btn" id="themeBtn" type="button" onclick="toggleTheme()">Dark mode</button>
+        <button class="theme-btn" id="changePassBtn" type="button" onclick="changePassword(event)" style="display:none">Change password</button>
         <button class="theme-btn" id="signOutBtn" type="button" onclick="signOut()" style="display:none">Sign out</button>
       </div>
     </header>
@@ -624,10 +702,16 @@
             <div style="margin-top:20px;max-width:380px">
               <input type="email" id="authEmail" placeholder="Email address"
                      autocomplete="email" inputmode="email" class="fld">
-              <input type="password" id="authPass" placeholder="Password"
-                     autocomplete="current-password" class="fld" style="margin-top:10px">
-              <input type="password" id="authPass2" placeholder="Confirm password"
-                     autocomplete="new-password" class="fld" style="margin-top:10px;display:none">
+              <div class="pwfield">
+                <input type="password" id="authPass" placeholder="Password"
+                       autocomplete="current-password" class="fld">
+                <button type="button" class="pw-toggle" onclick="togglePw('authPass', this)">Show</button>
+              </div>
+              <div class="pwfield" id="authPass2Wrap" style="display:none">
+                <input type="password" id="authPass2" placeholder="Confirm password"
+                       autocomplete="new-password" class="fld">
+                <button type="button" class="pw-toggle" onclick="togglePw('authPass2', this)">Show</button>
+              </div>
               <button class="theme-btn primary" id="authBtn" onclick="submitAuth()"
                       style="margin-top:12px">Sign in</button>
               <p class="notice" id="authStatus"></p>
@@ -667,13 +751,6 @@
           </div>
         </section>
 
-        <aside class="info-card" style="margin-top:18px;margin-bottom:6px">
-          <strong>Nothing to back up, nothing to lose.</strong>
-          Progress is stored against your account rather than this browser, so signing in
-          anywhere brings your history with you.
-          <a href="#" onclick="changePassword(event)">Change password</a>
-        </aside>
-
         <div class="section-heading">
           <h2>Specification sections</h2>
           <span id="topicCount"></span>
@@ -712,8 +789,9 @@ function toggleTheme(){
 function show(v){
   ['loading','auth','locked','topics'].forEach(x =>
     document.getElementById('v-' + x).style.display = x === v ? '' : 'none');
-  document.getElementById('signOutBtn').style.display =
-    (v === 'locked' || v === 'topics') ? '' : 'none';
+  const signedIn = (v === 'locked' || v === 'topics');
+  document.getElementById('signOutBtn').style.display = signedIn ? '' : 'none';
+  document.getElementById('changePassBtn').style.display = signedIn ? '' : 'none';
 }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g,
   c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -730,7 +808,7 @@ function toggleMode(e){
   document.getElementById('authIntro').textContent =
     signingUp ? 'Choose a password of at least 8 characters.'
               : 'Enter your email and password.';
-  document.getElementById('authPass2').style.display = signingUp ? '' : 'none';
+  document.getElementById('authPass2Wrap').style.display = signingUp ? '' : 'none';
   document.getElementById('authPass').setAttribute('autocomplete',
     signingUp ? 'new-password' : 'current-password');
   document.getElementById('authBtn').textContent = signingUp ? 'Create account' : 'Sign in';
@@ -739,6 +817,14 @@ function toggleMode(e){
   document.getElementById('authStatus').textContent = '';
 }
 function say(msg){ document.getElementById('authStatus').textContent = msg; }
+
+function togglePw(id, btn){
+  const el = document.getElementById(id);
+  const showing = el.type === 'password';
+  el.type = showing ? 'text' : 'password';
+  btn.textContent = showing ? 'Hide' : 'Show';
+  btn.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
+}
 
 async function submitAuth(){
   const email = document.getElementById('authEmail').value.trim();
@@ -854,6 +940,13 @@ function card(t, accent, pct){
   return a;
 }
 
+function progressClass(pct){
+  if(pct <= 0) return 'p-zero';
+  if(pct <= 40) return 'p-low';
+  if(pct <= 80) return 'p-mid';
+  return 'p-high';
+}
+
 function render(topics, progressByUnit){
   document.getElementById('topicCount').textContent = topics.length + ' quizzes available';
 
@@ -874,17 +967,19 @@ function render(topics, progressByUnit){
     const accent = HUES[gi % HUES.length];
     const sec = document.createElement('section');
     sec.className = 'syllabus-section';
-    sec.dataset.open = 'true';
+    sec.dataset.open = 'false';
     sec.style.setProperty('--section-accent', accent);
     const num = (g.label.match(/^\d+/) || [''])[0];
     const name = g.label.replace(/^\d+\.\s*/, '');
     const done = g.items.reduce((s, t) => s + (t._pct || 0), 0) / g.items.length;
     sec.innerHTML = `
-      <button class="syllabus-toggle" aria-expanded="true">
+      <button class="syllabus-toggle" aria-expanded="false">
         <div class="syllabus-number">${num || '&bull;'}</div>
-        <div class="syllabus-toggle-text"><h3 class="display">${esc(name)}</h3></div>
-        <span class="syllabus-count">${g.items.length} quiz${g.items.length > 1 ? 'zes' : ''}
-          &middot; ${Math.round(done)}%</span>
+        <div class="syllabus-toggle-text">
+          <h3 class="display">${esc(name)}</h3>
+          <span class="syllabus-progress ${progressClass(Math.round(done))}">${Math.round(done)}% mastered</span>
+        </div>
+        <span class="syllabus-count">${g.items.length} quiz${g.items.length > 1 ? 'zes' : ''}</span>
         <span class="syllabus-chevron" aria-hidden="true">&#9662;</span>
       </button>
       <div class="syllabus-body"><div class="syllabus-body-inner">
