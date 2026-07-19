@@ -1339,7 +1339,7 @@ document.addEventListener('keydown', e => {
 function gate(view){
   ['loading','auth','locked','topics'].forEach(v =>
     document.getElementById('view-' + v).classList.toggle('hidden', v !== view));
-  ['setup','quiz','results','notes','progress','data'].forEach(v =>
+  ['setup','quiz','results','notes','progress'].forEach(v =>
     document.getElementById('view-' + v).classList.add('hidden'));
   document.querySelector('nav').style.display = 'none';
   document.getElementById('signOutBtn').style.display = view === 'loading' || view === 'auth' ? 'none' : '';
