@@ -1445,7 +1445,8 @@ async function boot(){
 
   const { data: { session: s } } = await sb.auth.getSession();
   SESSION = s;
-  if(!SESSION){ gate('auth'); return; }
+  // Sign-in lives on the landing page, so there is one login screen, not two.
+  if(!SESSION){ location.href = 'index.html'; return; }
 
   const { data: profile } = await sb.from('profiles').select('has_access').maybeSingle();
   if(!profile || !profile.has_access){
