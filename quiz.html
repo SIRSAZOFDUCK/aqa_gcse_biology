@@ -228,12 +228,20 @@ select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:
 .up{color:var(--algae)} .down{color:var(--iodine)} .flat{color:var(--ink-soft)}
 .streakpill{font-size:calc(12px * var(--fs));font-weight:700;color:var(--stain);background:var(--stain-dim);border-radius:99px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--stain) 35%, var(--card))}
 /* daily goal */
-.goalpill{font-size:calc(12px * var(--fs));font-weight:700;color:var(--algae);background:var(--algae-dim);border-radius:99px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--algae) 35%, var(--card))}
+.goalpill{font-size:calc(12px * var(--fs));font-weight:700;color:var(--algae);background:var(--algae-dim);border-radius:99px;padding:4px 11px;border:1px solid color-mix(in srgb,var(--algae) 35%, var(--card))}
 .goalpill.done{color:var(--stain);background:var(--stain-dim);border-color:color-mix(in srgb,var(--stain) 35%, var(--card))}
-.goalsum{margin-top:14px;font-size:calc(14px * var(--fs));color:var(--ink-soft)}
-.goalsum .track{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px;max-width:320px}
-.goalsum .track>div{height:100%;background:var(--algae);border-radius:99px;transition:width .4s ease}
-.goalsum .track.done>div{background:var(--stain)}
+.goalsum{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.goalsum-head{font-size:calc(11px * var(--fs));font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--algae);margin-bottom:6px}
+.goalsum.done .goalsum-head{color:var(--stain)}
+.goalsum-fig{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+.goalsum-now{font-size:calc(38px * var(--fs));font-weight:700;line-height:.9;color:var(--algae);font-variant-numeric:tabular-nums}
+.goalsum.done .goalsum-now{color:var(--stain)}
+.goalsum-of{font-size:calc(19px * var(--fs));line-height:1;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.goalsum-said{margin-left:5px;font-size:calc(14px * var(--fs));color:var(--ink-soft)}
+.goalsum-said strong{color:var(--ink)}
+.goalsum .track{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.goalsum .track>div{height:100%;background:var(--algae);border-radius:99px;transition:width .45s cubic-bezier(.3,.9,.3,1)}
+.goalsum.done .track>div{background:var(--stain)}
 .answerbox{border-left:3px solid var(--algae);background:var(--algae-dim);padding:14px 16px;border-radius:0 11px 11px 0;margin-top:16px}
 .answerbox h3{margin:0 0 8px;font-size:calc(11px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--algae)}
 .answerbox ul{margin:8px 0 0;padding-left:20px}
@@ -645,7 +653,9 @@ function updateGoalPill(){
   if(!gp) return;
   if(!DAILY_GOAL){ gp.classList.add('hidden'); return; }
   const count = todayCount(), target = goalTarget(), done = count >= target;
-  gp.textContent = done ? ('\u2691 ' + count + ' today') : (count + '/' + target + ' today');
+  gp.textContent = done
+    ? 'Daily goal reached \u2713'
+    : 'Daily goal ' + count + '/' + target;
   gp.className = 'goalpill' + (done ? ' done' : '');
 }
 function renderGoalSummary(){
@@ -657,12 +667,17 @@ function renderGoalSummary(){
   const pct = Math.min(100, Math.round(count / target * 100));
   const left = target - count;
   el.classList.remove('hidden');
-  el.innerHTML = (done
-      ? '<strong style="color:var(--stain)">Daily goal reached</strong> \u2014 ' +
-        count + ' question' + (count === 1 ? '' : 's') + ' answered today across all topics.'
-      : '<strong>' + count + ' of ' + target + '</strong> towards today\u2019s goal \u2014 ' +
-        left + ' more to go.') +
-    '<div class="track' + (done ? ' done' : '') + '"><div style="width:' + pct + '%"></div></div>';
+  el.className = 'goalsum' + (done ? ' done' : '');
+  el.innerHTML =
+    '<div class="goalsum-head">Daily goal' + (done ? ' \u2014 reached' : '') + '</div>' +
+    '<div class="goalsum-fig">' +
+      '<span class="goalsum-now display">' + count + '</span>' +
+      '<span class="goalsum-of display">/ ' + target + '</span>' +
+      '<span class="goalsum-said">' + (done
+        ? 'Done for today. Anything more is a bonus.'
+        : '<strong>' + left + ' more</strong> to go, across any topic.') + '</span>' +
+    '</div>' +
+    '<div class="track"><div style="width:' + pct + '%"></div></div>';
 }
 
 /* The number in the corner badge. Set display_number in the bank to control it.

@@ -596,43 +596,79 @@
       background: var(--accent);
       transition: width .3s ease;
     }
-    /* ---- daily goal bar ---- */
-    .daily-bar {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-bottom: 22px;
-      padding: 16px 20px;
+    /* ---- daily goal ---- */
+    .daily-card {
+      margin-bottom: 26px;
+      padding: 22px 26px;
       border: 1px solid var(--line);
-      border-left: 4px solid var(--algae);
-      border-radius: 0 var(--radius) var(--radius) 0;
+      border-top: 5px solid var(--algae);
+      border-radius: var(--radius);
       background: var(--card);
       box-shadow: var(--shadow);
     }
-    .daily-bar.done { border-left-color: var(--stain); }
-    .daily-bar .dc {
-      flex: none;
-      font-size: 2.1rem;
-      font-weight: 700;
-      line-height: 1;
+    .daily-card.done { border-top-color: var(--stain); }
+    .daily-top {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .daily-eyebrow {
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .11em;
+      text-transform: uppercase;
       color: var(--algae);
     }
-    .daily-bar.done .dc { color: var(--stain); }
-    .daily-bar .dl {
-      flex: 1;
-      min-width: 160px;
-      font-size: .85rem;
+    .daily-card.done .daily-eyebrow { color: var(--stain); }
+    .daily-goalsel {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .8rem;
       color: var(--ink-soft);
     }
-    .daily-bar .dl strong {
-      display: block;
-      margin-bottom: 7px;
+    .daily-goalsel select {
+      font: inherit;
+      font-size: .82rem;
+      font-weight: 600;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--card-2);
       color: var(--ink);
-      font-size: .95rem;
+      cursor: pointer;
     }
+    .daily-figure {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 6px 0 14px;
+    }
+    .daily-now {
+      font-size: 3.6rem;
+      font-weight: 700;
+      line-height: .9;
+      color: var(--algae);
+      font-variant-numeric: tabular-nums;
+    }
+    .daily-card.done .daily-now { color: var(--stain); }
+    .daily-of {
+      font-size: 1.5rem;
+      line-height: 1;
+      color: var(--ink-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    .daily-said {
+      margin-left: 6px;
+      font-size: .95rem;
+      color: var(--ink-soft);
+    }
+    .daily-said strong { color: var(--ink); }
     .daily-track {
-      height: 6px;
+      height: 11px;
       border-radius: 99px;
       background: var(--line);
       overflow: hidden;
@@ -641,23 +677,16 @@
       height: 100%;
       border-radius: 99px;
       background: var(--algae);
-      transition: width .4s ease;
+      transition: width .45s cubic-bezier(.3,.9,.3,1);
     }
-    .daily-bar.done .daily-track > div { background: var(--stain); }
-    .daily-bar select {
-      flex: none;
-      font: inherit;
-      font-size: .82rem;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: var(--card-2);
-      color: var(--ink);
-      cursor: pointer;
-    }
+    .daily-card.done .daily-track > div { background: var(--stain); }
     @media (max-width: 680px) {
-      .daily-bar { gap: 14px; padding: 15px 16px; }
-      .daily-bar select { width: 100%; }
+      .daily-card { padding: 18px 16px; }
+      .daily-now { font-size: 2.9rem; }
+      .daily-goalsel { margin-left: 0; width: 100%; margin-top: 4px; }
+      .daily-goalsel select { margin-left: auto; }
+      .daily-figure { flex-wrap: wrap; }
+      .daily-said { margin-left: 0; width: 100%; }
     }
 
     .tprog-label {
@@ -1106,6 +1135,8 @@ function dailyTotal(rows){
     return sum + (l && l.date === today ? (l.count || 0) : 0);
   }, 0);
 }
+const GOAL_CHOICES = [10, 20, 30, 40, 50];
+
 function renderGoalBar(rows){
   const bar = document.getElementById('dailyBar');
   if(!bar) return;
@@ -1117,26 +1148,31 @@ function renderGoalBar(rows){
   const pct = Math.min(100, Math.round(count / target * 100));
   const left = target - count;
 
-  const headline = done
-    ? 'Daily goal reached'
+  /* One line, in the interface's voice, that says what to do next. */
+  const said = done
+    ? '<strong>Goal reached.</strong> Anything more today is a bonus.'
     : (count === 0
-        ? 'Nothing answered yet today'
-        : left + ' more question' + (left === 1 ? '' : 's') + ' to reach today\u2019s goal');
-  const detail = done
-    ? count + ' question' + (count === 1 ? '' : 's') + ' answered today. Anything past this is a bonus.'
-    : count + ' of ' + target + ' answered today, across every topic.';
+        ? 'Nothing answered yet today. Pick a topic below to start.'
+        : '<strong>' + left + ' more</strong> to go, across any topic.');
 
   bar.innerHTML =
-    '<div class="daily-bar' + (done ? ' done' : '') + '">' +
-      '<div class="dc">' + count + '</div>' +
-      '<div class="dl"><strong>' + headline + '</strong>' + detail +
-        '<div class="daily-track"><div style="width:' + pct + '%"></div></div>' +
+    '<div class="daily-card' + (done ? ' done' : '') + '">' +
+      '<div class="daily-top">' +
+        '<span class="daily-eyebrow">Daily goal' + (done ? ' \u2014 reached' : '') + '</span>' +
+        '<span class="daily-goalsel">' +
+          '<label for="goalSel">Target</label>' +
+          '<select id="goalSel" onchange="setGoal(this.value)">' +
+            GOAL_CHOICES.map(n => '<option value="' + n + '"' +
+              (n === target ? ' selected' : '') + '>' + n + ' a day</option>').join('') +
+          '</select>' +
+        '</span>' +
       '</div>' +
-      '<select onchange="setGoal(this.value)" aria-label="Questions per day">' +
-        [10, 20, 30].map(n =>
-          '<option value="' + n + '"' + (n === target ? ' selected' : '') + '>' +
-          n + ' a day</option>').join('') +
-      '</select>' +
+      '<div class="daily-figure">' +
+        '<span class="daily-now display">' + count + '</span>' +
+        '<span class="daily-of display">/ ' + target + '</span>' +
+        '<span class="daily-said">' + said + '</span>' +
+      '</div>' +
+      '<div class="daily-track"><div style="width:' + pct + '%"></div></div>' +
     '</div>';
 }
 /* The rows are stashed so changing the target can redraw without refetching. */
