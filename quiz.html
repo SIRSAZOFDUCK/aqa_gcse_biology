@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AQA GCSE Biology revision</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --paper:#eef2ef;
+  --dots:rgba(31,122,92,.10);
+  --card:#ffffff;
+  --card-2:#fafcfa;
+  --ink:#16232c;
+  --ink-soft:#5b6f7c;
+  --line:#d5ddd7;
+  --algae:#1f7a5c;
+  --algae-dim:#dcece5;
+  --iodine:#b8452f;
+  --iodine-dim:#f8e3de;
+  --stain:#c08c12;
+  --stain-dim:#fbf1d8;
+  --violet:#4a56a6;
+  --btn-ink:#16232c;
+  --btn-text:#ffffff;
+  --shadow:0 1px 0 rgba(22,35,44,.05), 0 10px 26px -20px rgba(22,35,44,.6);
+  /* subtopic hues */
+  --s1:#4a56a6; --s2:#1f7a5c; --s3:#8f3f6b; --s4:#a86a12; --s5:#1c6d86;
+  --radius:14px;
+  --fs:1;
+}
+[data-theme="dark"]{
+  --paper:#101a20;
+  --dots:rgba(122,196,166,.10);
+  --card:#17242c;
+  --card-2:#1b2a33;
+  --ink:#e6eeea;
+  --ink-soft:#9db0ba;
+  --line:#2b3d47;
+  --algae:#57bd95;
+  --algae-dim:#1c3a30;
+  --iodine:#e8836a;
+  --iodine-dim:#3b2019;
+  --stain:#e0b543;
+  --stain-dim:#39301a;
+  --violet:#8f9ae0;
+  --btn-ink:#57bd95;
+  --btn-text:#0d1519;
+  --shadow:0 10px 26px -20px rgba(0,0,0,.9);
+  --zoomtext:#e6eeea;
+  --s1:#8b95e6; --s2:#57bd95; --s3:#d283b0; --s4:#e0aa4e; --s5:#6fbcd8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(var(--dots) 1px, transparent 1px);
+  background-size:22px 22px;
+  color:var(--ink);
+  font:calc(16px * var(--fs))/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+  transition:background-color .2s ease,color .2s ease;
+}
+.display{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif}
+.wrap{max-width:840px;margin:0 auto;padding:20px 18px 80px}
+
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.topicmark{
+  font-family:"Iowan Old Style",Palatino,Georgia,serif;
+  font-size:40px;line-height:1;letter-spacing:-1px;
+  background:var(--algae);color:var(--btn-text);
+  width:62px;height:62px;display:flex;align-items:center;justify-content:center;
+  border-radius:16px;flex:none;
+}
+[data-theme="light"] .topicmark{color:#fff}
+h1{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:calc(28px * var(--fs));line-height:1.05;margin:0;font-weight:600}
+.sub{color:var(--ink-soft);font-size:calc(12px * var(--fs));letter-spacing:.09em;text-transform:uppercase;margin-top:5px;font-weight:600}
+.hdrtools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.zoom{display:flex;align-items:center;border:1px solid var(--line);border-radius:99px;background:var(--card);overflow:hidden}
+.zoom button{appearance:none;font:inherit;cursor:pointer;background:none;border:0;color:var(--ink-soft);
+  padding:7px 12px;font-weight:700;line-height:1.1}
+.zoom button:hover:not([disabled]){color:var(--ink)}
+.zoom button[disabled]{opacity:.35;cursor:not-allowed}
+.zoom .a-sm{font-size:12px}
+.zoom .a-lg{font-size:17px}
+.zoom .sep{width:1px;align-self:stretch;background:var(--line)}
+.themeBtn{appearance:none;font:inherit;font-size:calc(13px * var(--fs));font-weight:600;cursor:pointer;
+  background:var(--card);color:var(--ink-soft);border:1px solid var(--line);
+  border-radius:99px;padding:8px 14px;display:flex;align-items:center;gap:7px;
+}
+.themeBtn:hover{color:var(--ink);border-color:var(--ink-soft)}
+
+nav{display:flex;gap:4px;margin:20px 0 18px;border-bottom:1px solid var(--line)}
+nav button{
+  appearance:none;background:none;border:0;border-bottom:2px solid transparent;
+  font:inherit;font-size:calc(14px * var(--fs));font-weight:600;color:var(--ink-soft);
+  padding:9px 12px;cursor:pointer;margin-bottom:-1px;
+}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--algae)}
+button:focus-visible,.sub-row:focus-within{outline:2px solid var(--violet);outline-offset:2px;border-radius:8px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px;position:relative;overflow:hidden}
+.card h2{font-size:calc(12px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 13px;font-weight:700}
+.muted{color:var(--ink-soft)}
+.small{font-size:calc(13px * var(--fs))}
+.rail{position:absolute;inset:0 0 auto 0;height:4px;background:var(--accent,var(--algae))}
+
+button.btn{appearance:none;font:inherit;font-weight:600;cursor:pointer;border-radius:10px;padding:11px 16px;border:1px solid var(--btn-ink);background:var(--btn-ink);color:var(--btn-text)}
+button.btn:hover{filter:brightness(1.08)}
+button.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button.btn.ghost:hover{background:var(--card-2);border-color:var(--ink-soft);filter:none}
+button.btn.small{padding:7px 12px;font-size:calc(13px * var(--fs));border-radius:8px}
+button.btn[disabled]{opacity:.4;cursor:not-allowed;filter:none}
+
+.subtopics{display:grid;gap:8px}
+.sub-row{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--card-2)}
+.sub-row:hover{border-color:var(--accent);border-left-color:var(--accent)}
+.sub-row input{width:18px;height:18px;accent-color:var(--accent);flex:none}
+.sub-row .code{font-variant-numeric:tabular-nums;font-size:calc(13px * var(--fs));color:var(--accent);font-weight:700;flex:none;min-width:56px}
+.sub-row .name{font-weight:600}
+.sub-row .count{margin-left:auto;font-size:calc(12px * var(--fs));color:var(--ink-soft);white-space:nowrap;text-align:right}
+.opt-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:calc(11px * var(--fs));letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
+
+.plate{border:1px solid var(--line);border-radius:var(--radius);background:var(--card-2);padding:14px;display:flex;flex-wrap:wrap;gap:5px}
+.dot{width:13px;height:13px;border-radius:50%;background:var(--line);box-shadow:inset 0 0 0 2px var(--card-2)}
+.dot[data-s="learning"]{background:var(--iodine);box-shadow:none}
+.dot[data-s="close"]{background:var(--stain);box-shadow:none}
+.dot[data-s="mastered"]{background:var(--algae);box-shadow:none}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:calc(12px * var(--fs));color:var(--ink-soft)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+.progressbar{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.progressbar>div{height:100%;background:var(--algae);width:0;transition:width .3s ease}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font-size:calc(11px * var(--fs));font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:99px;background:var(--card-2);color:var(--ink-soft);border:1px solid var(--line)}
+.chip.topic{background:color-mix(in srgb,var(--accent) 13%, var(--card));color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%, var(--card))}
+.chip.rp{background:var(--iodine-dim);color:var(--iodine);border-color:color-mix(in srgb,var(--iodine) 35%, var(--card))}
+.chip.marks{background:var(--algae-dim);color:var(--algae);border-color:color-mix(in srgb,var(--algae) 35%, var(--card))}
+.qtext{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:calc(23px * var(--fs));line-height:1.35;margin:0 0 18px}
+.options{display:grid;gap:9px}
+.option{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;font:inherit;color:var(--ink);background:var(--card-2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;cursor:pointer}
+.option:hover:not([disabled]){border-color:var(--accent)}
+.option .key{font-weight:700;color:var(--ink-soft);flex:none;font-size:calc(13px * var(--fs));line-height:1.5}
+.option[data-state="correct"]{border-color:var(--algae);background:var(--algae-dim)}
+.option[data-state="wrong"]{border-color:var(--iodine);background:var(--iodine-dim)}
+.option[disabled]{cursor:default}
+.option .glyph{margin-left:auto;font-weight:700;font-size:calc(15px * var(--fs));flex:none;opacity:0}
+.option[data-state="correct"] .glyph{opacity:1;color:var(--algae)}
+.option[data-state="wrong"] .glyph{opacity:1;color:var(--iodine)}
+.hintline{font-size:calc(12px * var(--fs));color:var(--ink-soft);margin:10px 0 0}
+/* figures */
+.figure{border:1px solid var(--line);background:var(--card-2);border-radius:12px;padding:14px;margin:0 0 16px}
+.figure svg{display:block;width:100%;height:auto;max-height:260px;color:var(--ink)}
+.figure figcaption{font-size:calc(12px * var(--fs));color:var(--ink-soft);margin-top:10px;line-height:1.45}
+/* compact options when they are just diagram labels */
+.options.labels{grid-template-columns:repeat(auto-fit,minmax(64px,1fr))}
+.options.labels .option{justify-content:center;font-weight:700;font-size:calc(17px * var(--fs));padding:14px 10px}
+.options.labels .option .glyph{margin-left:8px}
+/* mastered payoff */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:50;
+  background:var(--algae);color:#fff;border-radius:99px;padding:12px 20px;font-weight:700;
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px;
+  font-size:calc(14px * var(--fs));animation:pop .35s ease}
+.toast .big{font-size:calc(18px * var(--fs))}
+@keyframes pop{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}}
+.estimate{font-size:calc(13px * var(--fs));color:var(--ink-soft)}
+.skiplink{background:none;border:0;font:inherit;font-size:calc(13px * var(--fs));color:var(--ink-soft);
+  text-decoration:underline;cursor:pointer;padding:8px 0;margin-top:4px}
+.skiplink:hover{color:var(--ink)}
+/* mark-scheme tick list */
+.ticks{list-style:none;margin:8px 0 0;padding:0}
+.ticks li{margin:0 0 6px}
+.ticks label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;padding:8px 10px;border:1px solid transparent;border-radius:9px}
+.ticks label:hover{background:color-mix(in srgb,var(--algae) 8%, transparent)}
+.ticks input{width:20px;height:20px;accent-color:var(--algae);flex:none;margin-top:1px}
+.ticks label.on{background:color-mix(in srgb,var(--algae) 14%, transparent)}
+.tickcount{font-weight:700;font-size:calc(13px * var(--fs));color:var(--algae);margin:10px 0 0}
+.actions{margin-top:14px}
+.actions .btn{width:100%;padding:14px 16px;font-size:calc(16px * var(--fs))}
+.actions .row2{display:flex;gap:8px;margin-top:8px}
+.actions .row2 .btn{font-size:calc(14px * var(--fs));padding:11px 12px}
+/* subtopic-grouped question map */
+.maprow{margin-bottom:14px}
+.maprow:last-child{margin-bottom:0}
+.maphead{display:flex;align-items:center;gap:8px;font-size:calc(12px * var(--fs));font-weight:700;letter-spacing:.04em;color:var(--accent);margin-bottom:7px}
+.maphead .pct{margin-left:auto;color:var(--ink-soft);font-weight:600}
+.mapdots{display:flex;flex-wrap:wrap;gap:5px}
+/* revision notes */
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.pill{appearance:none;font:inherit;font-size:calc(13px * var(--fs));font-weight:600;cursor:pointer;border-radius:99px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft)}
+.pill[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 15%, var(--card));color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%, var(--card))}
+.notes h3{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:calc(19px * var(--fs));margin:22px 0 8px;color:var(--accent)}
+.notes h3:first-of-type{margin-top:6px}
+.notes ul{margin:0;padding-left:20px}
+.notes li{margin-bottom:7px}
+.notes .lede{font-size:calc(17px * var(--fs));line-height:1.5;margin:0 0 4px}
+.terms{display:grid;gap:8px;margin-top:8px}
+.term{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:10px 12px;background:var(--card-2)}
+.term b{display:block}
+.watch{background:var(--stain-dim);border-left:3px solid var(--stain);border-radius:0 11px 11px 0;padding:14px 16px;margin-top:18px}
+.watch h4{margin:0 0 8px;font-size:calc(11px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--stain)}
+.watch ul{padding-left:20px;margin:0}
+/* session ladder summary */
+.ladder{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.ladder .lad{flex:1 1 150px;border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--card-2);display:flex;align-items:center;gap:10px}
+.ladder .lad b{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:calc(26px * var(--fs));line-height:1}
+.arrow{font-size:calc(18px * var(--fs));font-weight:700}
+.up{color:var(--algae)} .down{color:var(--iodine)} .flat{color:var(--ink-soft)}
+.streakpill{font-size:calc(12px * var(--fs));font-weight:700;color:var(--stain);background:var(--stain-dim);border-radius:99px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--stain) 35%, var(--card))}
+.answerbox{border-left:3px solid var(--algae);background:var(--algae-dim);padding:14px 16px;border-radius:0 11px 11px 0;margin-top:16px}
+.answerbox h3{margin:0 0 8px;font-size:calc(11px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--algae)}
+.answerbox ul{margin:8px 0 0;padding-left:20px}
+.answerbox li{margin-bottom:5px}
+.answerbox .lead{font-weight:600;margin:0}
+.answerbox .tail{margin:10px 0 0;font-size:calc(13px * var(--fs));font-style:italic;color:var(--ink-soft)}
+.note{border-left:3px solid var(--stain);background:var(--stain-dim);padding:14px 16px;border-radius:0 11px 11px 0;margin-top:10px}
+.note h3{margin:0 0 6px;font-size:calc(11px * var(--fs));letter-spacing:.09em;text-transform:uppercase;color:var(--stain)}
+.grade{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.grade button{flex:1 1 150px}
+.g-yes{background:var(--algae);border-color:var(--algae);color:#fff}
+.g-part{background:var(--stain);border-color:var(--stain);color:#2c2409}
+.g-no{background:var(--iodine);border-color:var(--iodine);color:#fff}
+.verdict{font-weight:700;margin-top:14px}
+.verdict.ok{color:var(--algae)}
+.verdict.bad{color:var(--iodine)}
+.qfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
+.qfoot .spacer{flex:1}
+.reviewbar{background:var(--card-2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:calc(13px * var(--fs));color:var(--ink-soft);margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stat{border:1px solid var(--line);border-radius:11px;padding:14px;background:var(--card-2);border-top:3px solid var(--accent,var(--algae))}
+.stat .n{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:calc(32px * var(--fs));line-height:1}
+.stat .l{font-size:calc(11px * var(--fs));letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:calc(14px * var(--fs))}
+th,td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:calc(11px * var(--fs));letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;min-width:70px}
+.bar>div{height:100%;background:var(--accent);border-radius:99px}
+.weak-list{list-style:none;padding:0;margin:0}
+.weak-list li{padding:11px 0;border-bottom:1px solid var(--line)}
+.weak-list li:last-child{border-bottom:0}
+.weak-list .q{font-weight:600}
+.hidden{display:none !important}
+.rowbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);text-align:center}
+@media (max-width:640px){
+  .wrap{padding:14px 12px 40px}
+  .topicmark{font-size:28px;width:46px;height:46px;border-radius:13px}
+  h1{font-size:calc(21px * var(--fs))}
+  .qtext{font-size:calc(20px * var(--fs))}
+  .sub-row .count{width:100%;margin-left:0;text-align:left;order:9}
+  .sub-row{flex-wrap:wrap}
+  .card{padding:15px 14px}
+  nav button{padding:9px 9px;font-size:calc(13px * var(--fs))}
+  .option{padding:14px 13px}
+  .ticks input{width:22px;height:22px}
+  .statgrid{grid-template-columns:1fr 1fr}
+  .stat .n{font-size:calc(27px * var(--fs))}
+  /* keep the thing you have to press within thumb reach */
+  .actions{position:sticky;bottom:0;z-index:5;padding:12px 0 10px;margin-bottom:-4px;
+    background:linear-gradient(to bottom, transparent, var(--card) 26%)}
+  .grade{flex-direction:column}
+  .grade button{width:100%}
+  .qfoot .btn{flex:1}
+  table{font-size:calc(13px * var(--fs))}
+  th,td{padding:9px 4px}
+  .hintline{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="topicmark display" id="topicMark" aria-hidden="true"></div>
+    <div>
+      <h1 id="unitTitle">GCSE Biology</h1>
+      <div class="sub" id="unitSub">Revision quizzes and notes</div>
+    </div>
+    <div class="hdrtools">
+      <div class="zoom" role="group" aria-label="Text size">
+        <button class="a-sm" id="zoomOut" onclick="stepZoom(-1)" title="Smaller text" aria-label="Smaller text">A</button>
+        <span class="sep"></span>
+        <button class="a-lg" id="zoomIn" onclick="stepZoom(1)" title="Bigger text" aria-label="Bigger text">A</button>
+      </div>
+      <button class="themeBtn" id="topicsBtn" onclick="showTopics()" style="display:none">All topics</button>
+      <button class="themeBtn" id="themeBtn" onclick="toggleTheme()">Dark mode</button>
+      <button class="themeBtn" id="signOutBtn" onclick="signOut()" style="display:none">Sign out</button>
+    </div>
+  </header>
+
+  <nav role="tablist">
+    <button role="tab" id="tab-quiz" aria-selected="true" onclick="showTab('quiz')">Quiz</button>
+    <button role="tab" id="tab-notes" aria-selected="false" onclick="showTab('notes')">Notes</button>
+    <button role="tab" id="tab-progress" aria-selected="false" onclick="showTab('progress')">Progress</button>
+    <button role="tab" id="tab-data" aria-selected="false" onclick="showTab('data')">Saving &amp; backup</button>
+  </nav>
+
+  <!-- ============ GATE ============ -->
+  <section id="view-loading">
+    <div class="card"><p class="muted" style="margin:0">Loading…</p></div>
+  </section>
+
+  <section id="view-auth" class="hidden">
+    <div class="card">
+      <h2>Sign in</h2>
+      <p class="small">Enter your email address and we'll send you a link that signs
+        you in. There is no password to remember or lose.</p>
+      <div class="field" style="max-width:340px">
+        <label for="authEmail">Email address</label>
+        <input type="email" id="authEmail" autocomplete="email" inputmode="email"
+               placeholder="you@example.com"
+               style="font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)">
+      </div>
+      <div class="rowbtns" style="margin-top:14px">
+        <button class="btn" id="authBtn" onclick="sendMagicLink()">Send me a link</button>
+      </div>
+      <p class="small muted" id="authStatus" style="margin-bottom:0"></p>
+    </div>
+  </section>
+
+  <section id="view-locked" class="hidden">
+    <div class="card">
+      <h2>No access yet</h2>
+      <p class="small">You're signed in as <strong id="lockedEmail"></strong>, but this
+        account doesn't have access to the questions yet.</p>
+      <p class="small" style="margin-bottom:0">If you've just paid, it can take a few
+        minutes. Otherwise, get in touch and we'll sort it out.</p>
+      <div class="rowbtns" style="margin-top:14px">
+        <button class="btn ghost" onclick="signOut()">Sign out</button>
+        <button class="btn ghost" onclick="location.reload()">Check again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOPICS ============ -->
+  <section id="view-topics" class="hidden">
+    <div class="card">
+      <h2>Choose a topic</h2>
+      <div class="subtopics" id="topicList"></div>
+    </div>
+  </section>
+
+  <!-- ============ SETUP ============ -->
+  <section id="view-setup">
+    <div class="card">
+      <h2>Choose what to revise</h2>
+      <div class="rowbtns" style="margin-bottom:12px">
+        <button class="btn ghost small" onclick="setAllSubtopics(true)">Select all</button>
+        <button class="btn ghost small" onclick="setAllSubtopics(false)">Clear</button>
+      </div>
+      <div class="subtopics" id="subtopicList"></div>
+
+      <div class="opt-row" style="margin-top:16px">
+        <div class="field">
+          <label for="lenSel">Questions this session</label>
+          <select id="lenSel">
+            <option value="10">10</option>
+            <option value="15" selected>15</option>
+            <option value="25">25</option>
+            <option value="0">Everything selected</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tierSel">Tier</label>
+          <select id="tierSel">
+            <option value="all" selected>Both tiers</option>
+            <option value="Foundation">Foundation only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="modeSel">Picking order</label>
+          <select id="modeSel">
+            <option value="smart" selected>Smart (weak first)</option>
+            <option value="random">Shuffle everything</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:18px" class="rowbtns">
+        <button class="btn" id="startBtn" onclick="startSession()">Start session</button>
+        <span class="estimate" id="poolInfo"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Where you're up to</h2>
+      <div class="plate" id="platePreview"></div>
+      <div class="legend" id="legend1"></div>
+      <p class="small muted" style="margin-bottom:0">One dot per question. Each dot moves towards green as you keep getting it right, and drops back when you miss it.</p>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="view-quiz" class="hidden">
+    <div class="progressbar"><div id="qProgress"></div></div>
+    <div class="card" id="qCard">
+      <div class="rail"></div>
+      <div class="reviewbar hidden" id="reviewBar"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <span class="small muted" id="qCounter"></span>
+        <span class="streakpill hidden" id="streakPill"></span>
+      </div>
+      <div class="chips" id="qChips"></div>
+      <figure class="figure hidden" id="qFigure"><div id="qFigureSvg"></div><figcaption id="qFigureCap"></figcaption></figure>
+      <p class="qtext display" id="qText"></p>
+      <div class="options" id="qOptions"></div>
+      <div id="revealArea"></div>
+      <div id="afterArea" class="hidden">
+        <div class="answerbox">
+          <h3>Mark scheme</h3>
+          <div id="qAnswer"></div>
+        </div>
+        <div class="note hidden" id="qNoteBox">
+          <h3>Watch out</h3>
+          <div id="qNote"></div>
+        </div>
+        <div id="gradeArea"></div>
+      </div>
+      <div class="qfoot">
+        <button class="btn ghost small" id="backBtn" onclick="goBack()">← Previous</button>
+        <span class="spacer"></span>
+        <button class="btn ghost small" onclick="quitSession()">End session</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="view-results" class="hidden">
+    <div class="card">
+      <h2>Session finished</h2>
+      <div class="statgrid" id="sessionStats"></div>
+      <div class="ladder" id="ladderSummary"></div>
+      <div style="margin-top:18px" class="rowbtns">
+        <button class="btn" onclick="showSetup()">Another session</button>
+        <button class="btn ghost" onclick="showTab('progress')">See progress</button>
+      </div>
+    </div>
+    <div class="card" id="sessionMissedCard">
+      <h2>Worth another look</h2>
+      <button class="btn" id="redoBtn" style="margin-bottom:14px">Redo these now</button>
+      <ul class="weak-list" id="sessionMissed"></ul>
+    </div>
+  </section>
+
+  <!-- ============ PROGRESS ============ -->
+  <section id="view-progress" class="hidden">
+    <div class="card">
+      <h2>Overall</h2>
+      <div class="statgrid" id="overallStats"></div>
+    </div>
+    <div class="card">
+      <h2>By subtopic</h2>
+      <table>
+        <thead><tr><th>Subtopic</th><th class="num">Tried</th><th class="num">Correct</th><th style="width:120px">Mastery</th></tr></thead>
+        <tbody id="subtopicStats"></tbody>
+      </table>
+      <p class="small muted" style="margin:14px 0 0">Each question climbs a short ladder: <strong>not tried → learning → getting there → mastered</strong>. A correct answer moves it up a rung, a missed one sends it back to the bottom, and it takes three correct answers — spread out over days, not minutes — to reach mastered. <strong>Mastery</strong> below is how far up that ladder a subtopic's questions have climbed on average.</p>
+    </div>
+    <div class="card">
+      <h2>Weakest questions</h2>
+      <ul class="weak-list" id="weakList"></ul>
+    </div>
+    <div class="card">
+      <h2>Question map</h2>
+      <div id="plateFull"></div>
+      <div class="legend" id="legend2"></div>
+    </div>
+  </section>
+
+  <!-- ============ NOTES ============ -->
+  <section id="view-notes" class="hidden">
+    <div class="pills" id="notePills"></div>
+    <div class="card notes" id="noteBody"></div>
+    <div class="rowbtns" style="margin-bottom:20px">
+      <button class="btn" id="noteQuizBtn">Quiz me on this subtopic</button>
+    </div>
+  </section>
+
+  <!-- ============ DATA ============ -->
+  <section id="view-data" class="hidden">
+    <div class="card">
+      <h2>How saving works</h2>
+      <p class="small">Progress is stored by your browser against this exact file in this exact folder. Keep the file where it is and reopen it the same way each time and your history carries over. Move it, rename it, or download a fresh copy and the browser treats it as a new file, so it will look like a reset.</p>
+      <p class="small"><strong>On a phone.</strong> It works, with two things to know. Save the file somewhere permanent — Files on an iPhone, Downloads on Android — and open it from there each time rather than re-downloading. Phone and computer keep entirely separate records, so answering on one does not show up on the other. On an iPhone, Safari may also clear stored progress if the file has not been opened for a couple of weeks.</p>
+      <p class="small" style="margin-bottom:0">Because of all that, save a backup file now and then — always before moving the file, and if you want to carry progress between a phone and a computer.</p>
+    </div>
+    <div class="card">
+      <h2>Backup</h2>
+      <div class="rowbtns">
+        <button class="btn" onclick="exportProgress()">Save backup file</button>
+        <button class="btn ghost" onclick="document.getElementById('importFile').click()">Load backup file</button>
+        <input type="file" id="importFile" accept="application/json" class="hidden" onchange="importProgress(event)">
+      </div>
+      <p class="small muted" id="dataStatus" style="margin-bottom:0"></p>
+    </div>
+    <div class="card">
+      <h2>Start again</h2>
+      <p class="small">Clears every answer record for this topic. There is no undo, so take a backup first.</p>
+      <button class="btn ghost" onclick="resetProgress()" style="border-color:var(--iodine);color:var(--iodine)">Erase all progress</button>
+    </div>
+  </section>
+
+  <footer id="footNote"></footer>
+</div>
+
+<script>
+/* ===================== DATA ===================== */
+/* ---- fill these two in, then never touch them again -------------------
+   Both are safe to publish: the publishable key can only reach data that
+   the row level security policies already allow. The secret key must NEVER
+   appear in this file. */
+const SUPABASE_URL = 'https://eicnlfyrlxhpaulysrwj.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_wl_-8j-Cmu2t1-Q-1Xqxkw_6lHlcGXy';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let BANK = null;      // the question bank, once fetched
+let SESSION = null;   // the signed-in user's session
+let UNIT = new URLSearchParams(location.search).get('unit') || null;
+
+/* The number in the corner badge. Set display_number in the bank to control it.
+   Falls back to the leading digit of aqa_topic if the field is absent, which is
+   how every bank behaved before display_number existed. */
+function badgeNumber(){
+  if(BANK.display_number !== undefined && BANK.display_number !== null)
+    return String(BANK.display_number);
+  return (String(BANK.aqa_topic || '').match(/\d+/) || ['1'])[0];
+}
+/* The shared part of the spec references this bank covers, e.g. "4.1.3" from
+   4.1.3.1, 4.1.3.2 and 4.1.3.3. Shown in the footer so the page still says
+   plainly which part of the specification it belongs to. */
+function specRange(){
+  const refs = BANK.aqa_refs_covered || [];
+  if(!refs.length) return String(BANK.aqa_topic || '').trim();
+  const parts = refs.map(r => String(r).split('.'));
+  const out = [];
+  for(let i = 0; i < parts[0].length; i++){
+    if(parts.every(p => p[i] === parts[0][i])) out.push(parts[0][i]);
+    else break;
+  }
+  return out.length ? out.join('.') : refs.join(', ');
+}
+/* Filename-safe version of the topic title, for the backup file. */
+function slugTitle(){
+  return String(BANK.unit_title || 'progress').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'progress';
+}
+
+/* ===================== THEME ===================== */
+const THEME_KEY = 'gcsebio_theme';
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
+}
+function toggleTheme(){
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+(function(){
+  let t = 'light';
+  try{ t = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
+  document.documentElement.setAttribute('data-theme', t);
+})();
+
+/* ===================== TEXT SIZE ===================== */
+const ZOOM_KEY = 'gcsebio_textsize';
+const ZOOM_STEPS = [0.85, 1, 1.15, 1.3, 1.5];
+let zoomIdx = 1;
+function applyZoom(){
+  document.documentElement.style.setProperty('--fs', ZOOM_STEPS[zoomIdx]);
+  const out = document.getElementById('zoomOut'), inn = document.getElementById('zoomIn');
+  if(out) out.disabled = zoomIdx === 0;
+  if(inn) inn.disabled = zoomIdx === ZOOM_STEPS.length - 1;
+  try{ localStorage.setItem(ZOOM_KEY, zoomIdx); }catch(e){}
+}
+function stepZoom(dir){
+  zoomIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, zoomIdx + dir));
+  applyZoom();
+}
+(function(){
+  try{
+    const v = parseInt(localStorage.getItem(ZOOM_KEY), 10);
+    if(Number.isInteger(v) && v >= 0 && v < ZOOM_STEPS.length) zoomIdx = v;
+  }catch(e){}
+  document.documentElement.style.setProperty('--fs', ZOOM_STEPS[zoomIdx]);
+})();
+
+/* ===================== STATE ===================== */
+const HOUR = 3600e3;
+const INTERVALS = [0.15, 12, 72, 336]; // hours before a question is due again, per rung
+const MAX_BOX = 3;
+let progress = blankProgress();
+let session = null;
+function storeKey(){ return 'gcsebio_' + (BANK ? BANK.unit : 'none') + '_v1'; }
+function blankProgress(){
+  return {questions:{}, streak:0, bestStreak:0, sessions:0, updated:0};
+}
+
+/* Progress lives in two places: localStorage, which is instant and works
+   offline, and Supabase, which is what makes it follow the account onto
+   another device. localStorage is the working copy; the server is the
+   backup and the sync point. Whichever has the newer `updated` wins. */
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(storeKey());
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return blankProgress();
+}
+async function loadRemote(){
+  try{
+    const { data, error } = await sb.from('progress')
+      .select('data').eq('unit', BANK.unit).maybeSingle();
+    if(error || !data) return null;
+    return data.data;
+  }catch(e){ return null; }
+}
+async function loadProgress(){
+  const local = loadLocal();
+  const remote = await loadRemote();
+  if(remote && (remote.updated || 0) > (local.updated || 0)){
+    progress = remote;
+    try{ localStorage.setItem(storeKey(), JSON.stringify(progress)); }catch(e){}
+  } else {
+    progress = local;
+    // Local is ahead (an offline session, or a first sign-in on this device),
+    // so push it up rather than letting it be overwritten later.
+    if(local.updated) pushProgress();
+  }
+}
+
+/* Writes are frequent — one per question — so the server write is debounced.
+   localStorage is written every time, so nothing is lost if the tab closes. */
+let pushTimer = null, pushFailed = false;
+function save(){
+  progress.updated = Date.now();
+  try{ localStorage.setItem(storeKey(), JSON.stringify(progress)); }
+  catch(e){ setStatus("Couldn't save to this browser. Your progress is still being saved online."); }
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushProgress, 3000);
+}
+async function pushProgress(){
+  if(!BANK || !SESSION) return;
+  try{
+    const { error } = await sb.from('progress').upsert({
+      user_id: SESSION.user.id, unit: BANK.unit, data: progress
+    }, { onConflict: 'user_id,unit' });
+    if(error) throw error;
+    if(pushFailed){ pushFailed = false; setStatus('Back online — progress saved.'); }
+  }catch(e){
+    pushFailed = true;
+    setStatus("Saved on this device, but not online yet. It'll sync when you reconnect.");
+  }
+}
+// Don't lose the last few answers if the tab is closed mid-session.
+window.addEventListener('beforeunload', () => {
+  if(pushTimer){ clearTimeout(pushTimer); pushProgress(); }
+});
+function rec(id){
+  if(!progress.questions[id]) progress.questions[id] = {seen:0,correct:0,wrong:0,partial:0,box:0,due:0,last:0};
+  return progress.questions[id];
+}
+// Four states: not tried → learning → getting there → mastered.
+function state(id){
+  const r = progress.questions[id];
+  if(!r || !r.seen) return 'new';
+  if(r.box >= MAX_BOX) return 'mastered';
+  if(r.box === MAX_BOX - 1) return 'close';
+  return 'learning';
+}
+
+/* ===================== SUBTOPIC COLOURS ===================== */
+const LEVELS = {new:'not tried', learning:'learning', close:'getting there', mastered:'mastered'};
+let subtopicIds = [];
+const HUES = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
+function hue(ref){ return HUES[subtopicIds.indexOf(ref) % HUES.length]; }
+let selected = new Set();
+
+/* ===================== SETUP SCREEN ===================== */
+function buildSubtopicList(){
+  const el = document.getElementById('subtopicList');
+  el.innerHTML = '';
+  subtopicIds.forEach(ref => {
+    const qs = BANK.questions.filter(q => q.aqa_ref === ref);
+    const m = masteryPct(qs);
+    const row = document.createElement('label');
+    row.className = 'sub-row';
+    row.style.setProperty('--accent', hue(ref));
+    row.innerHTML = `<input type="checkbox" ${selected.has(ref)?'checked':''}>
+      <span class="code">${ref}</span>
+      <span class="name">${BANK.subtopic_titles[ref]}</span>
+      <span class="count">${qs.length} questions · ${m}% mastery</span>`;
+    row.querySelector('input').addEventListener('change', e => {
+      e.target.checked ? selected.add(ref) : selected.delete(ref);
+      updatePoolInfo();
+    });
+    el.appendChild(row);
+  });
+  updatePoolInfo();
+}
+function setAllSubtopics(on){
+  selected = on ? new Set(subtopicIds) : new Set();
+  buildSubtopicList();
+}
+function pool(){
+  const tier = document.getElementById('tierSel').value;
+  return BANK.questions.filter(q => {
+    if(!selected.has(q.aqa_ref)) return false;
+    if(tier === 'Foundation' && q.tier === 'Higher') return false;
+    return true;
+  });
+}
+// Rough time per question, so a session length means something before starting.
+function secondsFor(q){
+  let t = {'MCQ':20, 'closed short answer':35, 'structured':45, 'open response':55}[q.type] || 40;
+  t += 8 * Math.max(0, q.marks - 1);
+  if(q.figure) t += 12;
+  return t;
+}
+function estimateText(list){
+  const mins = list.reduce((t,q) => t + secondsFor(q), 0) / 60;
+  if(mins < 1.5) return 'about a minute';
+  if(mins < 60) return `about ${Math.round(mins)} minutes`;
+  return `about ${(mins/60).toFixed(1)} hours`;
+}
+function plannedList(){
+  const p = pool();
+  const n = parseInt(document.getElementById('lenSel').value, 10);
+  if(!(n > 0) || n >= p.length) return p;
+  const now = Date.now();
+  return p.slice().sort((a,b) => score(b,now) - score(a,now)).slice(0, n);
+}
+function updatePoolInfo(){
+  const p = pool();
+  if(!p.length){
+    document.getElementById('poolInfo').textContent = 'Pick at least one subtopic.';
+    document.getElementById('startBtn').disabled = true;
+    return;
+  }
+  const due = p.filter(q => { const r = progress.questions[q.id]; return !r || !r.seen || r.due <= Date.now(); }).length;
+  const planned = plannedList();
+  document.getElementById('poolInfo').innerHTML =
+    `${p.length} questions selected · ${due} ready for review now<br><strong>This session: ${planned.length} questions, ${estimateText(planned)}.</strong>`;
+  document.getElementById('startBtn').disabled = false;
+}
+
+/* ===================== PLATE ===================== */
+function drawPlate(elId, qs){
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  qs.forEach(q => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.dataset.s = state(q.id);
+    el.appendChild(d);
+  });
+}
+// Question map split into one row per subtopic, so the map says something.
+function drawGroupedMap(){
+  const host = document.getElementById('plateFull');
+  host.innerHTML = '';
+  subtopicIds.forEach(ref => {
+    const qs = BANK.questions.filter(q => q.aqa_ref === ref);
+    const row = document.createElement('div');
+    row.className = 'maprow plate';
+    row.style.setProperty('--accent', hue(ref));
+    row.innerHTML = `<div class="maphead"><span>${ref} · ${BANK.subtopic_titles[ref]}</span>
+      <span class="pct">${masteryPct(qs)}% mastery</span></div><div class="mapdots"></div>`;
+    const dots = row.querySelector('.mapdots');
+    qs.forEach(q => {
+      const dd = document.createElement('div');
+      dd.className = 'dot';
+      dd.dataset.s = state(q.id);
+      dots.appendChild(dd);
+    });
+    host.appendChild(row);
+  });
+}
+function drawLegend(id){
+  document.getElementById(id).innerHTML = `
+    <span><i style="background:var(--line)"></i>Not tried</span>
+    <span><i style="background:var(--iodine)"></i>Learning</span>
+    <span><i style="background:var(--stain)"></i>Getting there</span>
+    <span><i style="background:var(--algae)"></i>Mastered</span>`;
+}
+
+/* ===================== SESSION ===================== */
+function startSessionWith(list){
+  session = {list, i:0, shown:null, right:0, partial:0, wrong:0, marks:0, possible:0, missed:[], history:[], reviewing:null, climbed:0, slipped:0, held:0, mastered:0};
+  progress.sessions = (progress.sessions || 0) + 1;
+  save();
+  ['quiz','notes','progress','data'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === 'quiz'));
+  showView('quiz');
+  renderQuestion();
+}
+function startSession(){
+  const p = pool();
+  if(!p.length) return;
+  const mode = document.getElementById('modeSel').value;
+  const n = parseInt(document.getElementById('lenSel').value, 10);
+  let list = p.slice();
+  if(mode === 'random') list.sort(() => Math.random() - 0.5);
+  else { const now = Date.now(); list.sort((a,b) => score(b,now) - score(a,now)); }
+  if(n > 0) list = list.slice(0, n);
+  if(mode === 'smart') list.sort(() => Math.random() - 0.5);
+
+  startSessionWith(list);
+}
+function score(q, now){
+  const r = progress.questions[q.id];
+  let s;
+  if(!r || !r.seen) s = 45;
+  else if(r.due > now) s = 10;
+  else s = r.box === 0 ? 100 : 60;
+  return s + Math.random() * 20;
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function norm(s){ return String(s).toLowerCase().replace(/[^a-z0-9]/g,''); }
+const KEYS = 'ABCDEF';
+// Options that are just diagram labels ("A", "B") don't need a second letter in front of them.
+function isLabelSet(q){ return !!q.options && q.options.every(o => String(o).trim().length <= 2); }
+function optionHtml(q, text, idx){
+  const lead = isLabelSet(q) ? '' : `<span class="key">${KEYS[idx]}</span>`;
+  return `${lead}<span>${escapeHtml(text)}</span><span class="glyph"></span>`;
+}
+// Works out which option the mark scheme points at; -1 means fall back to self-marking.
+function correctIndex(q){
+  if(!q.options) return -1;
+  if(Number.isInteger(q.answer_index)) return q.answer_index;
+  const ans = norm(q.model_answer);
+  const hits = q.options.map((o,i) => ans.includes(norm(o)) ? i : -1).filter(i => i > -1);
+  return hits.length === 1 ? hits[0] : -1;
+}
+function answerHtml(q){
+  if(!q.answer_points && !(typeof q.model_answer === 'string' && q.model_answer.trim())){
+    // A bank should never reach here, but an empty panel would be worse than a fallback.
+    const key = correctIndex(q);
+    const fallback = key > -1 ? q.options[key] : 'This question has no mark scheme recorded.';
+    return `<p style="margin:0">${escapeHtml(fallback)}</p>`;
+  }
+  if(q.answer_points && q.answer_points.length){
+    let h = '';
+    if(q.answer_lead) h += `<p class="lead">${escapeHtml(q.answer_lead)}</p>`;
+    h += '<ul>' + q.answer_points.map(p => `<li>${escapeHtml(p)}</li>`).join('') + '</ul>';
+    if(q.answer_tail) h += `<p class="tail">${escapeHtml(q.answer_tail)}</p>`;
+    return h;
+  }
+  return `<p style="margin:0">${escapeHtml(q.model_answer)}</p>`;
+}
+
+// Fresh option order each showing, so answers can't be learned by position.
+// Exception: diagram labels (A, B, C…) are read off the figure, so they keep their order.
+function shuffledOptions(q){
+  const key = correctIndex(q);
+  const items = q.options.map((text, i) => ({text, right: i === key}));
+  if(isLabelSet(q)) return items;
+  for(let i = items.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+  return items;
+}
+
+function renderQuestion(){
+  session.reviewing = null;
+  session.shown = null;   // cleared here so a written question can't inherit the last MCQ's options
+  document.getElementById('reviewBar').classList.add('hidden');
+  const q = session.list[session.i];
+  paintQuestion(q, false);
+  document.getElementById('qProgress').style.width = (session.i / session.list.length * 100) + '%';
+  document.getElementById('qCounter').textContent = `Question ${session.i + 1} of ${session.list.length}`;
+  document.getElementById('backBtn').disabled = session.history.length === 0;
+  const pill = document.getElementById('streakPill');
+  const st = progress.streak || 0;
+  pill.classList.toggle('hidden', st < 3);
+  pill.textContent = `${st} in a row`;
+
+  const optWrap = document.getElementById('qOptions');
+  const reveal = document.getElementById('revealArea');
+  const key = correctIndex(q);
+
+  if(q.type === 'MCQ' && key > -1){
+    session.shown = shuffledOptions(q);
+    session.shown.forEach((opt, idx) => {
+      const b = document.createElement('button');
+      b.className = 'option';
+      b.innerHTML = optionHtml(q, opt.text, idx);
+      b.onclick = () => answerMCQ(idx);
+      optWrap.appendChild(b);
+    });
+    if(window.matchMedia && window.matchMedia('(pointer:fine)').matches)
+      reveal.innerHTML = `<p class="hintline">Keyboard: press 1–${q.options.length} to pick an answer, then Enter to carry on.</p>`;
+  } else {
+    if(q.options) q.options.forEach((opt, idx) => {
+      const b = document.createElement('button');
+      b.className = 'option'; b.disabled = true;
+      b.innerHTML = optionHtml(q, opt, idx);
+      optWrap.appendChild(b);
+    });
+    reveal.innerHTML = `<p class="small muted">Write or say your answer, then check it against the mark scheme.</p>`;
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = 'Show mark scheme';
+    b.onclick = () => revealAnswer(false);
+    reveal.appendChild(b);
+    const skip = document.createElement('button');
+    skip.className = 'skiplink';
+    skip.textContent = "Skip this one — show me the answer";
+    skip.onclick = () => revealAnswer(true);
+    reveal.appendChild(document.createElement('br'));
+    reveal.appendChild(skip);
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Shared painting of question text/chips, and clearing of the answer area.
+function paintQuestion(q, showAnswer){
+  document.getElementById('qCard').style.setProperty('--accent', hue(q.aqa_ref));
+  const chips = [
+    `<span class="chip topic" style="--accent:${hue(q.aqa_ref)}">${q.aqa_ref} · ${BANK.subtopic_titles[q.aqa_ref] || ''}</span>`,
+    `<span class="chip marks">${q.marks} mark${q.marks > 1 ? 's' : ''}</span>`
+  ];
+  if(q.rp) chips.push(`<span class="chip rp">Required practical ${q.rp.replace('RP','')}</span>`);
+  if(q.tier && q.tier !== 'Both') chips.push(`<span class="chip">${q.tier} tier</span>`);
+  document.getElementById('qChips').innerHTML = chips.join('');
+  document.getElementById('qText').textContent = q.question;
+  const figWrap = document.getElementById('qFigure');
+  if(q.figure && q.figure.svg){
+    document.getElementById('qFigureSvg').innerHTML = q.figure.svg;
+    const cap = document.getElementById('qFigureCap');
+    cap.textContent = q.figure.caption || '';
+    cap.classList.toggle('hidden', !q.figure.caption);
+    figWrap.classList.remove('hidden');
+  } else figWrap.classList.add('hidden');
+  document.getElementById('qOptions').innerHTML = '';
+  document.getElementById('qOptions').classList.toggle('labels', isLabelSet(q));
+  document.getElementById('revealArea').innerHTML = '';
+  document.getElementById('gradeArea').innerHTML = '';
+  if(showAnswer) showAfter(q); else document.getElementById('afterArea').classList.add('hidden');
+}
+
+function answerMCQ(idx){
+  const q = session.list[session.i];
+  const isRight = session.shown[idx].right;
+  document.querySelectorAll('#qOptions .option').forEach((b, i) => {
+    b.disabled = true;
+    const g = b.querySelector('.glyph');
+    if(session.shown[i].right){ b.dataset.state = 'correct'; g.textContent = '✓'; }
+    else if(i === idx){ b.dataset.state = 'wrong'; g.textContent = '✗'; }
+  });
+  showAfter(q);
+  const g = document.getElementById('gradeArea');
+  g.innerHTML = `<p class="verdict ${isRight ? 'ok' : 'bad'}">${isRight ? 'Correct.' : 'Not this time.'}</p>
+    <div class="actions"><button class="btn" id="contBtn">Next question</button></div>`;
+  document.getElementById('contBtn').onclick = () => grade(isRight ? 'yes' : 'no');
+  scrollToActions();
+}
+// The moment a question reaches the top of the ladder is the payoff — make it visible.
+function celebrate(q){
+  const old = document.querySelector('.toast');
+  if(old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.setAttribute('role', 'status');
+  t.innerHTML = `<span class="big">★</span><span>Mastered — ${escapeHtml(BANK.subtopic_titles[q.aqa_ref] || '')}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2600);
+}
+function scrollToActions(){
+  const a = document.querySelector('#gradeArea .actions');
+  if(a && a.scrollIntoView) a.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+
+function revealAnswer(skipped){
+  const q = session.list[session.i];
+  showAfter(q);
+  document.getElementById('revealArea').innerHTML = '';
+  const g = document.getElementById('gradeArea');
+
+  if(skipped){
+    g.innerHTML = `<p class="verdict bad" style="margin-top:0">Skipped — counted as missed, so it will come back soon.</p>
+      <div class="actions"><button class="btn" id="contBtn">Next question</button></div>`;
+    document.getElementById('contBtn').onclick = () => grade('no');
+    scrollToActions();
+    return;
+  }
+
+  // Multi-point answers are marked point by point: tick what you actually had.
+  if(q.answer_points && q.answer_points.length > 1){
+    const total = q.answer_points.length;
+    const need = Math.min(q.required_points || total, total);
+    g.innerHTML = `<p class="small muted" style="margin:0">Tick every point you actually got.</p>
+      <ul class="ticks" id="tickList">${q.answer_points.map((pt,i) =>
+        `<li><label><input type="checkbox" data-i="${i}"><span>${escapeHtml(pt)}</span></label></li>`).join('')}</ul>
+      <p class="tickcount" id="tickCount"></p>
+      <div class="actions"><button class="btn" id="contBtn">Save and carry on</button></div>`;
+    const boxes = [...g.querySelectorAll('#tickList input')];
+    const count = () => boxes.filter(b => b.checked).length;
+    const update = () => {
+      boxes.forEach(b => b.closest('label').classList.toggle('on', b.checked));
+      const got = count();
+      const el = document.getElementById('tickCount');
+      el.textContent = need < total
+        ? `${got} ticked — ${need} needed for full marks`
+        : `${got} of ${total} points`;
+      el.style.color = got >= need ? 'var(--algae)' : 'var(--ink-soft)';
+    };
+    boxes.forEach(b => b.addEventListener('change', update));
+    update();
+    document.getElementById('contBtn').onclick = () => {
+      const got = count();
+      grade(got >= need ? 'yes' : (got === 0 ? 'no' : 'part'), Math.min(1, got / need));
+    };
+  } else {
+    g.innerHTML = `<p class="small muted" style="margin-bottom:0">Did you get it?</p>
+      <div class="grade">
+        <button class="btn g-yes" onclick="grade('yes')">Got it</button>
+        <button class="btn g-no" onclick="grade('no')">Missed it</button>
+      </div>`;
+  }
+  scrollToActions();
+}
+
+function showAfter(q){
+  document.getElementById('qAnswer').innerHTML = answerHtml(q);
+  const noteBox = document.getElementById('qNoteBox');
+  if(q.explanatory_note){
+    document.getElementById('qNote').textContent = q.explanatory_note;
+    noteBox.classList.remove('hidden');
+  } else noteBox.classList.add('hidden');
+  document.getElementById('afterArea').classList.remove('hidden');
+}
+
+const LABELS = {yes:'Got it all', part:'Partly there', no:'Missed it'};
+
+function grade(result, fraction){
+  const q = session.list[session.i];
+  const r = rec(q.id);
+  const now = Date.now();
+  const boxBefore = r.box;
+  r.seen++; r.last = now;
+  session.possible += q.marks;
+
+  if(result === 'yes'){
+    r.correct++; r.box = Math.min(MAX_BOX, r.box + 1);
+    session.right++; session.marks += q.marks;
+    progress.streak = (progress.streak || 0) + 1;
+  } else if(result === 'part'){
+    r.partial = (r.partial || 0) + 1;
+    // Most of the way there holds its place; a long way short drops a rung.
+    r.box = (typeof fraction === 'number' && fraction >= 0.5) ? r.box : Math.max(0, r.box - 1);
+    session.partial++; session.marks += q.marks * (typeof fraction === 'number' ? fraction : 0.5);
+    session.missed.push(q);
+    progress.streak = 0;
+  } else {
+    r.wrong++; r.box = 0;
+    session.wrong++; session.missed.push(q);
+    progress.streak = 0;
+  }
+  progress.bestStreak = Math.max(progress.bestStreak || 0, progress.streak || 0);
+  r.due = now + (result === 'part' ? 4 : INTERVALS[r.box]) * HOUR;
+  if(r.box > boxBefore) session.climbed++;
+  else if(result === 'no') session.slipped++;   // back to the start, even if it was already there
+  else session.held++;
+  if(r.box >= MAX_BOX && boxBefore < MAX_BOX){ session.mastered++; celebrate(q); }
+  save();
+
+  session.history.push({q, result, shown: session.shown});
+  session.i++;
+  if(session.i >= session.list.length) endSession();
+  else renderQuestion();
+}
+
+/* --- looking back at questions already answered (read-only) --- */
+function goBack(){
+  const at = session.reviewing === null ? session.history.length : session.reviewing;
+  showHistory(at - 1);
+}
+function showHistory(idx){
+  if(idx < 0 || idx >= session.history.length) return;
+  session.reviewing = idx;
+  const {q, result} = session.history[idx];
+  paintQuestion(q, true);
+  const shown = session.history[idx].shown || (q.options || []).map((text,i) => ({text, right:i === correctIndex(q)}));
+  shown.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'option'; b.disabled = true;
+    b.innerHTML = optionHtml(q, opt.text, i);
+    if(opt.right){ b.dataset.state = 'correct'; b.querySelector('.glyph').textContent = '✓'; }
+    document.getElementById('qOptions').appendChild(b);
+  });
+  document.getElementById('qCounter').textContent = `Looking back · question ${idx + 1} of ${session.history.length} answered`;
+  const bar = document.getElementById('reviewBar');
+  bar.classList.remove('hidden');
+  bar.innerHTML = `<strong>You marked this “${LABELS[result]}”.</strong>
+    <span>Your record for it is already saved and won't change here.</span>`;
+  const g = document.getElementById('gradeArea');
+  g.innerHTML = '';
+  const nav = document.createElement('div');
+  nav.className = 'grade';
+  nav.innerHTML =
+    `<button class="btn ghost" ${idx === 0 ? 'disabled' : ''} onclick="showHistory(${idx - 1})">← Earlier</button>
+     <button class="btn ghost" ${idx === session.history.length - 1 ? 'disabled' : ''} onclick="showHistory(${idx + 1})">Later →</button>
+     <button class="btn" onclick="renderQuestion()">Back to question ${session.i + 1}</button>`;
+  g.appendChild(nav);
+  document.getElementById('backBtn').disabled = idx === 0;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function quitSession(){
+  if(session && session.history.length === 0){ showSetup(); return; }
+  endSession();
+}
+
+function endSession(){
+  const s = session;
+  const answered = s.right + s.partial + s.wrong;
+  const pct = answered ? Math.round((s.right + s.partial * 0.5) / answered * 100) : 0;
+  document.getElementById('sessionStats').innerHTML = `
+    <div class="stat" style="--accent:var(--algae)"><div class="n">${pct}%</div><div class="l">Session score</div></div>
+    <div class="stat" style="--accent:var(--s1)"><div class="n">${Math.round(s.marks)}/${s.possible}</div><div class="l">Marks</div></div>
+    <div class="stat" style="--accent:var(--algae)"><div class="n">${s.right}</div><div class="l">Got it all</div></div>
+    <div class="stat" style="--accent:var(--stain)"><div class="n">${s.partial}</div><div class="l">Partly there</div></div>
+    <div class="stat" style="--accent:var(--iodine)"><div class="n">${s.wrong}</div><div class="l">Missed</div></div>`;
+
+  const lad = document.getElementById('ladderSummary');
+  const bits = [];
+  if(s.climbed) bits.push(`<div class="lad"><span class="arrow up">▲</span><div><b>${s.climbed}</b> <span class="small muted">question${s.climbed>1?'s':''} climbed a step</span></div></div>`);
+  if(s.slipped) bits.push(`<div class="lad"><span class="arrow down">▼</span><div><b>${s.slipped}</b> <span class="small muted">went back to the start</span></div></div>`);
+  if(s.held) bits.push(`<div class="lad"><span class="arrow flat">■</span><div><b>${s.held}</b> <span class="small muted">held their place</span></div></div>`);
+  if(s.mastered) bits.unshift(`<div class="lad" style="border-color:var(--algae)"><span class="arrow up">★</span><div><b>${s.mastered}</b> <span class="small muted">reached mastered</span></div></div>`);
+  lad.innerHTML = bits.join('');
+
+  const missedQs = s.missed.slice();
+  document.getElementById('redoBtn').onclick = () => startSessionWith(missedQs.slice().sort(() => Math.random() - 0.5));
+  const missedEl = document.getElementById('sessionMissed');
+  missedEl.innerHTML = '';
+  if(s.missed.length){
+    document.getElementById('sessionMissedCard').classList.remove('hidden');
+    s.missed.forEach(q => {
+      const li = document.createElement('li');
+      li.innerHTML = `<div class="q">${escapeHtml(q.question)}</div>
+        <div class="small" style="color:${hue(q.aqa_ref)};font-weight:600;margin:3px 0 6px">${q.aqa_ref} · ${BANK.subtopic_titles[q.aqa_ref] || ''}</div>
+        <div class="small">${answerHtml(q)}</div>`;
+      missedEl.appendChild(li);
+    });
+  } else document.getElementById('sessionMissedCard').classList.add('hidden');
+  session = null;
+  showView('results');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ===================== PROGRESS VIEW ===================== */
+// Mastery = average position on the 5-step ladder across a set of questions.
+function masteryPct(qs){
+  const v = masteryOf(qs) * 100;
+  return v > 0 ? Math.max(1, Math.round(v)) : 0;   // never show 0% once some ground has been made
+}
+function masteryOf(qs){
+  if(!qs.length) return 0;
+  const total = qs.reduce((t,q) => {
+    const r = progress.questions[q.id];
+    return t + (r ? Math.min(r.box, MAX_BOX) : 0);
+  }, 0);
+  return total / (qs.length * MAX_BOX);
+}
+function renderProgress(){
+  let tried = 0, correct = 0, attempts = 0, mastered = 0, learning = 0;
+  BANK.questions.forEach(q => {
+    const r = progress.questions[q.id];
+    if(!r || !r.seen) return;
+    tried++; attempts += r.seen; correct += r.correct;
+    const st = state(q.id);
+    if(st === 'mastered') mastered++;
+    if(st === 'learning') learning++;
+  });
+  const pct = attempts ? Math.round(correct / attempts * 100) : 0;
+  const overallMastery = masteryPct(BANK.questions);
+  document.getElementById('overallStats').innerHTML = `
+    <div class="stat" style="--accent:var(--algae)"><div class="n">${pct}%</div><div class="l">Correct, all time</div></div>
+    <div class="stat" style="--accent:var(--s1)"><div class="n">${overallMastery}%</div><div class="l">Mastery, whole topic</div></div>
+    <div class="stat" style="--accent:var(--s5)"><div class="n">${tried}/${BANK.questions.length}</div><div class="l">Questions tried</div></div>
+    <div class="stat" style="--accent:var(--algae)"><div class="n">${mastered}</div><div class="l">Mastered</div></div>
+    <div class="stat" style="--accent:var(--iodine)"><div class="n">${learning}</div><div class="l">Still learning</div></div>
+    <div class="stat" style="--accent:var(--stain)"><div class="n">${progress.streak || 0}</div><div class="l">Current streak</div></div>
+    <div class="stat" style="--accent:var(--s3)"><div class="n">${progress.bestStreak || 0}</div><div class="l">Best streak</div></div>`;
+
+  const tb = document.getElementById('subtopicStats');
+  tb.innerHTML = '';
+  subtopicIds.forEach(ref => {
+    const qs = BANK.questions.filter(q => q.aqa_ref === ref);
+    let a = 0, c = 0, s = 0;
+    qs.forEach(q => {
+      const r = progress.questions[q.id];
+      if(r && r.seen){ s++; a += r.seen; c += r.correct; }
+    });
+    const mast = masteryPct(qs);
+    tb.insertAdjacentHTML('beforeend', `<tr style="--accent:${hue(ref)}">
+      <td><strong style="color:${hue(ref)}">${ref}</strong><br><span class="small">${BANK.subtopic_titles[ref]}</span></td>
+      <td class="num">${s}/${qs.length}</td>
+      <td class="num">${a ? Math.round(c / a * 100) + '%' : '—'}</td>
+      <td><div class="bar"><div style="width:${mast}%"></div></div><span class="small muted">${mast}%</span></td>
+    </tr>`);
+  });
+
+  const weakQs = BANK.questions
+    .filter(q => { const r = progress.questions[q.id]; return r && r.seen && (r.wrong + (r.partial || 0)) > 0; })
+    .sort((a, b) => {
+      const ra = progress.questions[a.id], rb = progress.questions[b.id];
+      return (rb.wrong + (rb.partial||0) - rb.correct) - (ra.wrong + (ra.partial||0) - ra.correct);
+    }).slice(0, 8);
+  const wl = document.getElementById('weakList');
+  wl.innerHTML = weakQs.length ? '' : '<li class="small muted">Nothing here yet. Missed questions will collect in this list.</li>';
+  weakQs.forEach(q => {
+    const r = progress.questions[q.id];
+    wl.insertAdjacentHTML('beforeend', `<li>
+      <div class="q">${escapeHtml(q.question)}</div>
+      <div class="small" style="color:${hue(q.aqa_ref)};font-weight:600">${q.aqa_ref} · ${BANK.subtopic_titles[q.aqa_ref] || ''}
+        <span class="muted" style="font-weight:400">· ${r.correct}/${r.seen} correct · ${LEVELS[state(q.id)]}</span></div>
+    </li>`);
+  });
+  drawGroupedMap();
+  drawLegend('legend2');
+}
+
+/* ===================== REVISION NOTES ===================== */
+let noteRef = null;
+function renderNotes(){
+  const NOTES = BANK.revision_notes || {};
+  const pills = document.getElementById('notePills');
+  pills.innerHTML = '';
+  subtopicIds.forEach(ref => {
+    if(!NOTES[ref]) return;
+    const b = document.createElement('button');
+    b.className = 'pill';
+    b.style.setProperty('--accent', hue(ref));
+    b.setAttribute('aria-pressed', ref === noteRef);
+    b.textContent = NOTES[ref].title;
+    b.onclick = () => { noteRef = ref; renderNotes(); window.scrollTo({top:0, behavior:'smooth'}); };
+    pills.appendChild(b);
+  });
+
+  const n = NOTES[noteRef];
+  const body = document.getElementById('noteBody');
+  if(!n){ body.innerHTML = '<p class="muted">No notes for this subtopic yet.</p>'; return; }
+  body.style.setProperty('--accent', hue(noteRef));
+  let h = `<h2>${noteRef} · ${escapeHtml(n.title)}</h2><p class="lede">${escapeHtml(n.summary)}</p>`;
+  n.sections.forEach(sec => {
+    h += `<h3>${escapeHtml(sec.heading)}</h3><ul>` +
+         sec.points.map(pt => `<li>${escapeHtml(pt)}</li>`).join('') + '</ul>';
+  });
+  if(n.key_terms && n.key_terms.length){
+    h += `<h3>Words to know</h3><div class="terms">` +
+      n.key_terms.map(t => `<div class="term"><b>${escapeHtml(t.term)}</b>${escapeHtml(t.meaning)}</div>`).join('') + '</div>';
+  }
+  if(n.exam_watch && n.exam_watch.length){
+    h += `<div class="watch"><h4>Where marks get lost</h4><ul>` +
+      n.exam_watch.map(w => `<li>${escapeHtml(w)}</li>`).join('') + '</ul></div>';
+  }
+  body.innerHTML = h;
+
+  const qs = BANK.questions.filter(q => q.aqa_ref === noteRef);
+  const btn = document.getElementById('noteQuizBtn');
+  btn.textContent = `Quiz me on this — ${qs.length} questions`;
+  btn.onclick = () => {
+    const list = qs.slice().sort((a,b) => score(b, Date.now()) - score(a, Date.now())).slice(0, 15)
+                   .sort(() => Math.random() - 0.5);
+    startSessionWith(list);
+  };
+}
+
+/* ===================== BACKUP ===================== */
+function setStatus(msg){ document.getElementById('dataStatus').textContent = msg; }
+function exportProgress(){
+  const blob = new Blob([JSON.stringify({unit:BANK.unit, saved:new Date().toISOString(), progress}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${slugTitle()}-progress-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setStatus('Backup saved to your downloads.');
+}
+async function importProgress(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const fr = new FileReader();
+  fr.onload = async () => {
+    try{
+      const data = JSON.parse(fr.result);
+      if(!data.progress || !data.progress.questions) throw new Error('bad file');
+      if(data.unit && data.unit !== BANK.unit){
+        setStatus("That backup is from a different topic, so it hasn't been loaded.");
+        ev.target.value = '';
+        return;
+      }
+      progress = data.progress;
+      progress.updated = Date.now();
+      save(); refreshAll();
+      await pushProgress();
+      setStatus('Backup loaded and synced to your account.');
+    }catch(e){ setStatus("That file isn't a progress backup for this quiz. Try another."); }
+    ev.target.value = '';
+  };
+  fr.readAsText(file);
+}
+function resetProgress(){
+  if(!confirm('Erase every answer record for this topic? This cannot be undone.')) return;
+  progress = {questions:{}, streak:0, bestStreak:0, sessions:0, updated:Date.now()};
+  save(); refreshAll();
+  setStatus('Progress erased.');
+}
+function refreshAll(){
+  buildSubtopicList();
+  drawPlate('platePreview', BANK.questions);
+  renderProgress();
+}
+
+/* ===================== NAV ===================== */
+function showView(v){
+  ['setup','quiz','results','notes','progress','data'].forEach(id => {
+    document.getElementById('view-' + id).classList.toggle('hidden', id !== v);
+  });
+}
+function showTab(t){
+  ['quiz','notes','progress','data'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === t));
+  if(t === 'quiz') showSetup();
+  else if(t === 'notes'){ renderNotes(); showView('notes'); }
+  else if(t === 'progress'){ renderProgress(); showView('progress'); }
+  else showView('data');
+}
+function showSetup(){
+  session = null;
+  buildSubtopicList();
+  drawPlate('platePreview', BANK.questions);
+  showView('setup');
+}
+document.addEventListener('keydown', e => {
+  if(document.getElementById('view-quiz').classList.contains('hidden')) return;
+  const opts = document.querySelectorAll('#qOptions .option:not([disabled])');
+  if(opts.length && '123456'.includes(e.key) && opts[+e.key - 1]){ opts[+e.key - 1].click(); return; }
+  if(e.key === 'Enter'){
+    const cont = document.getElementById('contBtn') || document.querySelector('#revealArea button');
+    if(cont){ e.preventDefault(); cont.click(); }
+  }
+});
+
+/* ===================== AUTH ===================== */
+function gate(view){
+  ['loading','auth','locked','topics'].forEach(v =>
+    document.getElementById('view-' + v).classList.toggle('hidden', v !== view));
+  ['setup','quiz','results','notes','progress','data'].forEach(v =>
+    document.getElementById('view-' + v).classList.add('hidden'));
+  document.querySelector('nav').style.display = 'none';
+  document.getElementById('signOutBtn').style.display = view === 'loading' || view === 'auth' ? 'none' : '';
+  document.getElementById('topicsBtn').style.display = 'none';
+}
+async function sendMagicLink(){
+  const email = document.getElementById('authEmail').value.trim();
+  const status = document.getElementById('authStatus');
+  if(!email || !email.includes('@')){ status.textContent = 'Enter a valid email address.'; return; }
+  const btn = document.getElementById('authBtn');
+  btn.disabled = true; status.textContent = 'Sending…';
+  const { error } = await sb.auth.signInWithOtp({
+    email, options: { emailRedirectTo: location.origin + location.pathname + location.search }
+  });
+  btn.disabled = false;
+  status.textContent = error
+    ? 'Could not send the link: ' + error.message
+    : 'Check your email — the link signs you straight in. It may be in spam.';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  location.href = location.pathname;
+}
+
+/* ===================== TOPIC PICKER ===================== */
+/* The topic list lives on index.html, which is the landing page. Anywhere the
+   engine would have shown its own picker, it hands back to that instead. */
+function showTopics(){ location.href = 'index.html'; }
+async function showTopicsInline(){
+  gate('topics');
+  const el = document.getElementById('topicList');
+  el.innerHTML = '<p class="muted small">Loading topics…</p>';
+  const { data, error } = await sb.from('catalog').select('*').order('sort_order');
+  if(error || !data || !data.length){
+    el.innerHTML = '<p class="muted small">Could not load the topic list.</p>';
+    return;
+  }
+  const HUE5 = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
+  el.innerHTML = '';
+  data.forEach((t, i) => {
+    const a = document.createElement('a');
+    a.className = 'sub-row';
+    a.href = location.pathname + '?unit=' + encodeURIComponent(t.unit);
+    a.style.setProperty('--accent', HUE5[i % HUE5.length]);
+    a.style.textDecoration = 'none';
+    a.style.color = 'inherit';
+    a.innerHTML = `<span class="code">${t.display_number}</span>
+      <span class="name">${t.unit_title}</span>
+      <span class="count">${t.question_count} questions · ${t.mark_total} marks</span>`;
+    el.appendChild(a);
+  });
+}
+
+/* ===================== BANK FETCH (cached) ===================== */
+/* Banks are large, and the free tier's egress is finite. So the bank is kept
+   in localStorage and only refetched when the server's updated_at changes —
+   one small request per session instead of a full download every time. */
+async function fetchBank(unit){
+  const cacheKey = 'gcsebio_bank_' + unit;
+  let cached = null;
+  try{ cached = JSON.parse(localStorage.getItem(cacheKey) || 'null'); }catch(e){}
+
+  const { data: stamp, error: stampErr } = await sb.from('banks')
+    .select('updated_at').eq('unit', unit).maybeSingle();
+
+  if(stampErr) throw stampErr;
+  if(!stamp) return null;                       // no access, or no such unit
+
+  if(cached && cached.updated_at === stamp.updated_at) return cached.bank;
+
+  const { data, error } = await sb.from('banks')
+    .select('bank,updated_at').eq('unit', unit).maybeSingle();
+  if(error || !data) throw (error || new Error('bank missing'));
+  try{
+    localStorage.setItem(cacheKey, JSON.stringify({updated_at: data.updated_at, bank: data.bank}));
+  }catch(e){}                                    // cache is an optimisation, not a requirement
+  return data.bank;
+}
+
+/* ===================== BOOT ===================== */
+async function boot(){
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+  applyZoom();
+  gate('loading');
+
+  const { data: { session: s } } = await sb.auth.getSession();
+  SESSION = s;
+  if(!SESSION){ gate('auth'); return; }
+
+  const { data: profile } = await sb.from('profiles').select('has_access').maybeSingle();
+  if(!profile || !profile.has_access){
+    document.getElementById('lockedEmail').textContent = SESSION.user.email || '';
+    gate('locked');
+    return;
+  }
+
+  if(!UNIT){ showTopics(); return; }
+
+  try{
+    BANK = await fetchBank(UNIT);
+  }catch(e){
+    gate('topics'); showTopics();
+    return;
+  }
+  if(!BANK){ showTopics(); return; }
+
+  await loadProgress();
+  startApp();
+}
+
+sb.auth.onAuthStateChange((event) => {
+  if(event === 'SIGNED_IN' && !BANK) boot();
+});
+
+/* ===================== INIT ===================== */
+function startApp(){
+  subtopicIds = Object.keys(BANK.subtopic_titles);
+  selected = new Set(subtopicIds);
+  noteRef = subtopicIds[0];
+  document.querySelector('nav').style.display = '';
+  document.getElementById('signOutBtn').style.display = '';
+  document.getElementById('topicsBtn').style.display = '';
+  ['loading','auth','locked','topics'].forEach(v =>
+    document.getElementById('view-' + v).classList.add('hidden'));
+  document.title = BANK.unit_title + ' — AQA GCSE Biology revision';
+  document.getElementById('unitSub').textContent = 'AQA GCSE Biology 8461';
+  document.getElementById('topicMark').textContent = badgeNumber();
+  document.getElementById('unitTitle').textContent = BANK.unit_title;
+  document.getElementById('unitSub').textContent = 'AQA GCSE Biology 8461';
+  const range = specRange();
+  const label = /^[\d.]+$/.test(range) ? `AQA ${range}` : range;
+  document.getElementById('footNote').textContent =
+    `${BANK.questions.length} questions · ${BANK.questions.reduce((t,q)=>t+q.marks,0)} marks · ${label}`;
+  ['tierSel','lenSel','modeSel'].forEach(id => document.getElementById(id).addEventListener('change', updatePoolInfo));
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+  applyZoom();
+  drawLegend('legend1');
+  showSetup();
+  renderProgress();
+}
+boot();
+</script>
+</body>
+</html>
