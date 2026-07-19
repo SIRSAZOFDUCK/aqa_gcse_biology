@@ -1,0 +1,23 @@
+name: Supabase keep-alive
+
+on:
+  schedule:
+    # Every 3 days at 06:00 UTC — well inside the 7-day idle window
+    - cron: '0 6 */3 * *'
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase catalog
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://eicnlfyrlxhpaulysrwj.supabase.co/rest/v1/catalog?select=unit&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "Supabase responded with HTTP $status"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "::error::Unexpected status from Supabase: $status"
+            exit 1
+          fi
