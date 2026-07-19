@@ -301,7 +301,6 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
     <button role="tab" id="tab-quiz" aria-selected="true" onclick="showTab('quiz')">Quiz</button>
     <button role="tab" id="tab-notes" aria-selected="false" onclick="showTab('notes')">Notes</button>
     <button role="tab" id="tab-progress" aria-selected="false" onclick="showTab('progress')">Progress</button>
-    <button role="tab" id="tab-data" aria-selected="false" onclick="showTab('data')">Saving &amp; backup</button>
   </nav>
 
   <!-- ============ GATE ============ -->
@@ -474,6 +473,12 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
       <div id="plateFull"></div>
       <div class="legend" id="legend2"></div>
     </div>
+    <div class="card">
+      <h2>Start again</h2>
+      <p class="small">Clears every answer record for this topic. There is no undo.</p>
+      <button class="btn ghost" onclick="resetProgress()" style="border-color:var(--iodine);color:var(--iodine)">Erase all progress</button>
+      <p class="small muted" id="dataStatus" style="margin:10px 0 0"></p>
+    </div>
   </section>
 
   <!-- ============ NOTES ============ -->
@@ -482,30 +487,6 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
     <div class="card notes" id="noteBody"></div>
     <div class="rowbtns" style="margin-bottom:20px">
       <button class="btn" id="noteQuizBtn">Quiz me on this subtopic</button>
-    </div>
-  </section>
-
-  <!-- ============ DATA ============ -->
-  <section id="view-data" class="hidden">
-    <div class="card">
-      <h2>How saving works</h2>
-      <p class="small">Progress is stored by your browser against this exact file in this exact folder. Keep the file where it is and reopen it the same way each time and your history carries over. Move it, rename it, or download a fresh copy and the browser treats it as a new file, so it will look like a reset.</p>
-      <p class="small"><strong>On a phone.</strong> It works, with two things to know. Save the file somewhere permanent — Files on an iPhone, Downloads on Android — and open it from there each time rather than re-downloading. Phone and computer keep entirely separate records, so answering on one does not show up on the other. On an iPhone, Safari may also clear stored progress if the file has not been opened for a couple of weeks.</p>
-      <p class="small" style="margin-bottom:0">Because of all that, save a backup file now and then — always before moving the file, and if you want to carry progress between a phone and a computer.</p>
-    </div>
-    <div class="card">
-      <h2>Backup</h2>
-      <div class="rowbtns">
-        <button class="btn" onclick="exportProgress()">Save backup file</button>
-        <button class="btn ghost" onclick="document.getElementById('importFile').click()">Load backup file</button>
-        <input type="file" id="importFile" accept="application/json" class="hidden" onchange="importProgress(event)">
-      </div>
-      <p class="small muted" id="dataStatus" style="margin-bottom:0"></p>
-    </div>
-    <div class="card">
-      <h2>Start again</h2>
-      <p class="small">Clears every answer record for this topic. There is no undo, so take a backup first.</p>
-      <button class="btn ghost" onclick="resetProgress()" style="border-color:var(--iodine);color:var(--iodine)">Erase all progress</button>
     </div>
   </section>
 
@@ -798,7 +779,7 @@ function startSessionWith(list){
   session = {list, i:0, shown:null, right:0, partial:0, wrong:0, marks:0, possible:0, missed:[], history:[], reviewing:null, climbed:0, slipped:0, held:0, mastered:0};
   progress.sessions = (progress.sessions || 0) + 1;
   save();
-  ['quiz','notes','progress','data'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === 'quiz'));
+  ['quiz','notes','progress'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === 'quiz'));
   showView('quiz');
   renderQuestion();
 }
@@ -1328,16 +1309,15 @@ function refreshAll(){
 
 /* ===================== NAV ===================== */
 function showView(v){
-  ['setup','quiz','results','notes','progress','data'].forEach(id => {
+  ['setup','quiz','results','notes','progress'].forEach(id => {
     document.getElementById('view-' + id).classList.toggle('hidden', id !== v);
   });
 }
 function showTab(t){
-  ['quiz','notes','progress','data'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === t));
+  ['quiz','notes','progress'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === t));
   if(t === 'quiz') showSetup();
   else if(t === 'notes'){ renderNotes(); showView('notes'); }
-  else if(t === 'progress'){ renderProgress(); showView('progress'); }
-  else showView('data');
+  else { renderProgress(); showView('progress'); }
 }
 function showSetup(){
   session = null;
