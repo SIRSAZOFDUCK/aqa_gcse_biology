@@ -754,7 +754,11 @@ async function submitAuth(){
       if(pass.length < 8){ return say('Use at least 8 characters.'); }
       if(pass !== pass2){ return say('The two passwords do not match.'); }
       say('Creating your account\u2026');
-      const { error } = await sb.auth.signUp({ email, password: pass });
+      /* Pass the redirect explicitly rather than relying on the project's
+         Site URL setting, which is easy to get wrong and silently sends
+         people to the wrong page. */
+      const { error } = await sb.auth.signUp({ email, password: pass,
+        options: { emailRedirectTo: location.origin + location.pathname } });
       if(error) return say(/already|exists|registered/i.test(error.message)
         ? 'There is already an account with that email. Sign in instead, or use the link below if you have forgotten the password.'
         : error.message);
