@@ -890,6 +890,13 @@
       min-height: 1.2em;
     }
 
+    /* ---- footer link through to the static topic pages ---- */
+    /* Sits in the served HTML rather than being drawn by JavaScript, because
+       its main job is to be the one crawlable link into biology_aqa/. */
+    .foot-links { display: block; margin-top: 6px; }
+    .foot-links a { color: var(--ink-soft); text-decoration: underline; }
+    .foot-links a:hover { color: var(--algae); }
+
     /* ---- locked topic card, shown to signed-out visitors ---- */
     .topic-card.locked {
       opacity: .7;
@@ -1028,7 +1035,13 @@
       </div>
     </div>
 
-    <footer id="foot">Retrieve GCSE · AQA Biology revision resources</footer>
+    <footer>
+      <!-- The tally is written into #foot by renderTopics(). Anything that
+           needs to survive that has to live outside it: textContent replaces
+           the lot, and a link in there vanishes the moment topics render. -->
+      <span id="foot">Retrieve GCSE · AQA Biology revision resources</span>
+      <span class="foot-links"><a href="biology_aqa/">Browse all 22 topics</a></span>
+    </footer>
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.7"></script>
