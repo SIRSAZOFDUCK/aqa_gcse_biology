@@ -689,6 +689,85 @@
       .daily-said { margin-left: 0; width: 100%; }
     }
 
+
+    /* ---- text size ---- */
+    .zoom {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: var(--card);
+      overflow: hidden;
+    }
+    .zoom button {
+      appearance: none;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      background: none;
+      border: 0;
+      color: var(--ink-soft);
+      padding: 6px 12px;
+      line-height: 1;
+    }
+    .zoom button:hover:not([disabled]) { color: var(--ink); }
+    .zoom button[disabled] { opacity: .35; cursor: not-allowed; }
+    .zoom .a-sm { font-size: 12px; }
+    .zoom .a-lg { font-size: 17px; }
+    .zoom .sep { width: 1px; align-self: stretch; background: var(--line); }
+
+    /* ---- due today ---- */
+    .due-card {
+      margin-bottom: 26px;
+      padding: 20px 26px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--stain);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .due-eyebrow {
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--stain);
+    }
+    .due-figure {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 6px 0 12px;
+    }
+    .due-now { font-size: 2.3rem; font-weight: 700; line-height: .9; color: var(--stain); }
+    .due-said { font-size: .92rem; color: var(--ink-soft); }
+    .due-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .due-chip {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 7px;
+      padding: 6px 13px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      text-decoration: none;
+      font-size: .84rem;
+    }
+    .due-chip:hover { border-color: var(--stain); }
+    .due-chip b { font-variant-numeric: tabular-nums; color: var(--stain); }
+
+    /* ---- a failure worth reading ---- */
+    .fail-card {
+      padding: 22px 26px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+    }
+    .fail-card h3 { margin: 0 0 8px; font-size: 1.15rem; }
+    .fail-card p { margin: 0 0 14px; color: var(--ink-soft); font-size: .93rem; }
+
     .tprog-label {
       display: flex;
       justify-content: space-between;
@@ -839,6 +918,13 @@
         <div class="sub">AQA GCSE Biology 8461</div>
       </div>
       <div class="header-tools">
+        <div class="zoom" role="group" aria-label="Text size">
+          <button class="a-sm" id="zoomOut" type="button" onclick="stepZoom(-1)"
+                  title="Smaller text" aria-label="Smaller text">A</button>
+          <span class="sep" aria-hidden="true"></span>
+          <button class="a-lg" id="zoomIn" type="button" onclick="stepZoom(1)"
+                  title="Bigger text" aria-label="Bigger text">A</button>
+        </div>
         <button class="theme-btn" id="themeBtn" type="button" onclick="toggleTheme()">Dark mode</button>
         <button class="theme-btn" id="changePassBtn" type="button" onclick="openPwModal(event)" style="display:none">Change password</button>
         <button class="theme-btn" id="signOutBtn" type="button" onclick="signOut()" style="display:none">Sign out</button>
@@ -863,6 +949,7 @@
         </section>
 
         <div id="dailyBar"></div>
+        <div id="dueBar"></div>
 
         <div class="section-heading">
           <h2>Specification sections</h2>
@@ -1104,6 +1191,127 @@ async function submitPwChange(){
 
 async function signOut(){ await sb.auth.signOut(); location.reload(); }
 
+/* ===================== TEXT SIZE =====================
+   The same setting as the quiz page, under the same key, so a student who
+   sizes the text up once does not lose it moving between the two.
+
+   The quiz page scales a --fs variable because its stylesheet is written in
+   px. This one is 36 rem declarations out of 38, so scaling the root font size
+   is both simpler and the thing rem is actually for. */
+const ZOOM_KEY = 'gcsebio_textsize';
+const ZOOM_STEPS = [0.85, 1, 1.15, 1.3, 1.5];
+let zoomIdx = 1;
+
+function applyZoom(){
+  document.documentElement.style.fontSize = (16 * ZOOM_STEPS[zoomIdx]) + 'px';
+  const out = document.getElementById('zoomOut'), inn = document.getElementById('zoomIn');
+  if(out) out.disabled = zoomIdx === 0;
+  if(inn) inn.disabled = zoomIdx === ZOOM_STEPS.length - 1;
+  try{ localStorage.setItem(ZOOM_KEY, zoomIdx); }catch(e){}
+}
+function stepZoom(dir){
+  zoomIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, zoomIdx + dir));
+  applyZoom();
+}
+(function(){
+  try{
+    const v = parseInt(localStorage.getItem(ZOOM_KEY), 10);
+    if(Number.isInteger(v) && v >= 0 && v < ZOOM_STEPS.length) zoomIdx = v;
+  }catch(e){}
+  document.documentElement.style.fontSize = (16 * ZOOM_STEPS[zoomIdx]) + 'px';
+})();
+
+/* ===================== WHERE THEY WERE HEADED =====================
+   quiz.html sends anyone signed out here with ?next=, so a shared link to a
+   topic survives the detour through sign-in.
+
+   The pattern match is the whole security of it: without it, next= would take
+   any address at all and this page would forward people to it, signed in and
+   trusting. Only a local .html file with a plain query string gets through. */
+function nextDestination(){
+  const raw = new URLSearchParams(location.search).get('next');
+  if(!raw) return null;
+  return /^[A-Za-z0-9_-]+\.html(\?[A-Za-z0-9_=&%.-]*)?$/.test(raw) ? raw : null;
+}
+
+/* ===================== DUE TODAY =====================
+   Progress was only ever shown per topic, so nothing anywhere said "37
+   questions are ready across five topics" - which is the one number that
+   makes spaced repetition work, because it is the reason to come back.
+
+   The rule matches the engine exactly: a question is due if it has no record,
+   or has never been seen, or its due time has passed. Anything else is the two
+   pages disagreeing about what "due" means, which is worse than not showing
+   it. */
+function dueFor(row, questionCount){
+  if(!questionCount) return 0;
+  const recs = (row && row.data && row.data.questions) || {};
+  const now = Date.now();
+  let waiting = 0;
+  Object.values(recs).forEach(r => { if(r && r.seen && r.due > now) waiting++; });
+  /* A bank can lose questions between sittings, leaving records with no
+     question behind them. That would push waiting above the count, so the
+     floor is a real guard rather than a formality. */
+  return Math.max(0, questionCount - waiting);
+}
+
+function renderDue(topics, byUnit){
+  const slot = document.getElementById('dueBar');
+  if(!slot) return;
+  const rows = topics
+    .map(t => ({t: t, due: dueFor(byUnit[t.unit], t.question_count)}))
+    .filter(r => r.due > 0);
+
+  /* Nothing due is the reward for having kept up, not an empty state to
+     apologise for - and on a first visit everything is due, which would make
+     this a restatement of the topic grid directly beneath it. */
+  const total = rows.reduce((s, r) => s + r.due, 0);
+  const started = topics.some(t => byUnit[t.unit]);
+  if(!started || !total){ slot.innerHTML = ''; return; }
+
+  rows.sort((a, b) => b.due - a.due);
+  const top = rows.slice(0, 5);
+  const said = rows.length === 1
+    ? 'ready in one topic'
+    : 'ready across ' + rows.length + ' topics';
+
+  slot.innerHTML =
+    '<div class="due-card">' +
+      '<div class="due-eyebrow">Ready for review</div>' +
+      '<div class="due-figure">' +
+        '<span class="due-now display">' + total + '</span>' +
+        '<span class="due-said">' + said +
+          '. These are the ones the spacing says you are closest to forgetting.</span>' +
+      '</div>' +
+      '<div class="due-list">' +
+        top.map(r =>
+          '<a class="due-chip" href="quiz.html?unit=' + encodeURIComponent(r.t.unit) + '">' +
+            esc(r.t.unit_title) + ' <b>' + r.due + '</b></a>').join('') +
+        (rows.length > top.length
+          ? '<span class="due-chip" style="opacity:.7">and ' +
+            (rows.length - top.length) + ' more</span>'
+          : '') +
+      '</div>' +
+    '</div>';
+}
+
+/* ===================== WHEN LOADING FAILS =====================
+   "Could not load the topic list. Try reloading." named no cause and offered
+   no route out. The two things that actually go wrong look quite different
+   from the outside: no connection, or the free-tier database asleep after
+   seven idle days. */
+function failureHtml(){
+  const offline = navigator.onLine === false;
+  return '<div class="fail-card">' +
+    '<h3>' + (offline ? 'You appear to be offline' : 'The topic list did not load') + '</h3>' +
+    '<p>' + (offline
+      ? 'Topics you have already opened will still work offline. The full list needs a connection.'
+      : 'This is nearly always temporary. Trying again in a moment usually sorts it.') +
+    '</p>' +
+    '<button class="theme-btn primary" type="button" onclick="boot()">Try again</button>' +
+    '</div>';
+}
+
 /* ===================== DAILY GOAL =====================
    Mirrors the block in quiz.html. Set DAILY_GOAL to false in BOTH files to
    switch the feature off completely.
@@ -1320,11 +1528,16 @@ async function boot(){
   show('loading');
   const { data: { session } } = await sb.auth.getSession();
 
+  /* Signed in and sent here from a topic link: hand them straight back. */
+  if(session){
+    const next = nextDestination();
+    if(next){ location.replace(next); return; }
+  }
+
   if(!session){
     const { data, error } = await sb.from('catalog').select('*').order('sort_order');
     if(error || !data || !data.length){
-      document.getElementById('sections').innerHTML =
-        '<div class="info-card">Could not load the topic list. Try reloading.</div>';
+      document.getElementById('sections').innerHTML = failureHtml();
       show('browse');
       return;
     }
@@ -1354,8 +1567,7 @@ async function boot(){
   ]);
 
   if(cat.error || !cat.data || !cat.data.length){
-    document.getElementById('sections').innerHTML =
-      '<div class="info-card">Could not load the topic list. Try reloading.</div>';
+    document.getElementById('sections').innerHTML = failureHtml();
     show('topics');
     return;
   }
@@ -1365,10 +1577,23 @@ async function boot(){
 
   goalRows = prog.data || [];
   renderGoalBar(goalRows);
+  renderDue(cat.data, byUnit);
   render(cat.data, byUnit);
   show('topics');
 }
 sb.auth.onAuthStateChange(e => { if(e === 'SIGNED_IN') boot(); });
+
+/* ===================== OFFLINE =====================
+   The manifest made this installable; without a worker, installing it got you
+   an icon and a page that failed the moment the wifi did. Registration is
+   deliberately last and deliberately quiet: a failure here must never be the
+   reason the page does not load. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
 document.addEventListener('keydown', e => {
   const modalOpen = !document.getElementById('pwModal').classList.contains('hidden');
   if(modalOpen && e.key === 'Escape'){ closePwModal(); return; }

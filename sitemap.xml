@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Only the landing page is listed. quiz.html is noindex, so listing it would
+  be asking search engines to index a page that then tells them not to.
+
+  The per-topic pages are the thing that would make this worth having: 22 real
+  URLs with the topic titles and spec references on them. Until those exist,
+  this file's job is to be correct rather than long.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://retrievegcse.co.uk/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

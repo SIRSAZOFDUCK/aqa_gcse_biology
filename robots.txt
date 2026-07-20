@@ -1,0 +1,9 @@
+# Retrieve GCSE — https://retrievegcse.co.uk/
+
+# quiz.html carries its own noindex, which is deliberately left crawlable:
+# a Disallow here would stop crawlers reading the page at all, and so stop
+# them ever seeing the noindex that is meant to keep it out of results.
+User-agent: *
+Allow: /
+
+Sitemap: https://retrievegcse.co.uk/sitemap.xml

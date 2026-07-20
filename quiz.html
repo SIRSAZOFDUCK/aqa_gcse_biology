@@ -260,6 +260,21 @@ select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:
 .grade button{flex:1 1 150px}
 .g-yes{background:var(--algae);border-color:var(--algae);color:#fff}
 .g-part{background:var(--stain);border-color:var(--stain);color:#2c2409}
+/* resuming a session */
+.resume-card{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  margin:0 0 16px;padding:14px 18px;border-radius:11px;
+  background:color-mix(in srgb, var(--algae) 10%, var(--card));
+  border:1px solid color-mix(in srgb, var(--algae) 32%, var(--card));
+  font-size:calc(14px * var(--fs));color:var(--ink)}
+.resume-card .rowbtns{margin:0;flex:none}
+/* reporting a question */
+.reportlink{appearance:none;font:inherit;font-size:calc(12.5px * var(--fs));cursor:pointer;
+  background:none;border:0;padding:10px 0 0;color:var(--ink-soft);text-decoration:underline;
+  text-underline-offset:3px}
+.reportlink:hover{color:var(--ink)}
+.reportbox{margin-top:12px;padding:13px 15px;border:1px dashed var(--line);border-radius:10px}
+.reportbox .rowbtns{margin:0;flex-wrap:wrap}
+.reportbox .btn{font-size:calc(12.5px * var(--fs));padding:7px 12px}
 .g-no{background:var(--iodine);border-color:var(--iodine);color:#fff}
 .verdict{font-weight:700;margin-top:14px}
 .verdict.ok{color:var(--algae)}
@@ -320,6 +335,8 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
       <div class="sub" id="unitSub">Revision quizzes and notes</div>
     </div>
     <div class="hdrtools">
+      <button class="themeBtn" id="shareBtn" type="button" onclick="shareTopic()"
+              style="display:none">Share</button>
       <div class="zoom" role="group" aria-label="Text size">
         <button class="a-sm" id="zoomOut" onclick="stepZoom(-1)" title="Smaller text" aria-label="Smaller text">A</button>
         <span class="sep"></span>
@@ -336,10 +353,13 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
     <a class="btn" href="index.html">Create a free account</a>
   </div>
 
-  <nav role="tablist">
-    <button role="tab" id="tab-quiz" aria-selected="true" onclick="showTab('quiz')">Quiz</button>
-    <button role="tab" id="tab-notes" aria-selected="false" onclick="showTab('notes')">Notes</button>
-    <button role="tab" id="tab-progress" aria-selected="false" onclick="showTab('progress')">Progress</button>
+  <nav role="tablist" aria-label="Topic sections" onkeydown="tabKey(event)">
+    <button role="tab" id="tab-quiz" aria-selected="true" aria-controls="view-quiz"
+            tabindex="0" onclick="showTab('quiz')">Quiz</button>
+    <button role="tab" id="tab-notes" aria-selected="false" aria-controls="view-notes"
+            tabindex="-1" onclick="showTab('notes')">Notes</button>
+    <button role="tab" id="tab-progress" aria-selected="false" aria-controls="view-progress"
+            tabindex="-1" onclick="showTab('progress')">Progress</button>
   </nav>
 
   <!-- ============ GATE ============ -->
@@ -349,19 +369,13 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
 
   <section id="view-auth" class="hidden">
     <div class="card">
-      <h2>Sign in</h2>
-      <p class="small">Enter your email address and we'll send you a link that signs
-        you in. There is no password to remember or lose.</p>
-      <div class="field" style="max-width:340px">
-        <label for="authEmail">Email address</label>
-        <input type="email" id="authEmail" autocomplete="email" inputmode="email"
-               placeholder="you@example.com"
-               style="font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)">
-      </div>
+      <h2>Sign in to carry on</h2>
+      <p class="small">Your answers are saved to your account rather than to this
+        device, so signing in picks you up exactly where you left off &mdash; on
+        any phone or computer.</p>
       <div class="rowbtns" style="margin-top:14px">
-        <button class="btn" id="authBtn" onclick="sendMagicLink()">Send me a link</button>
+        <button class="btn" id="authBtn" onclick="goSignIn()">Sign in or create an account</button>
       </div>
-      <p class="small muted" id="authStatus" style="margin-bottom:0"></p>
     </div>
   </section>
 
@@ -370,9 +384,8 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
       <h2>Setting up your account</h2>
       <p class="small">You're signed in as <strong id="lockedEmail"></strong>, but your
         account isn't quite ready yet.</p>
-      <p class="small" style="margin-bottom:0">This is usually just a short delay right
-        after signing up. Wait a moment and check again — if it's still like this later,
-        get in touch and we'll sort it out.</p>
+      <p class="small" style="margin-bottom:0" id="lockedHelp">This is usually just a
+        short delay right after signing up. Wait a moment and check again.</p>
       <div class="rowbtns" style="margin-top:14px">
         <button class="btn ghost" onclick="signOut()">Sign out</button>
         <button class="btn ghost" onclick="location.reload()">Check again</button>
@@ -390,6 +403,7 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
 
   <!-- ============ SETUP ============ -->
   <section id="view-setup">
+    <div id="resumeSlot"></div>
     <div class="card">
       <h2>Choose what to revise</h2>
       <div class="rowbtns" style="margin-bottom:12px">
@@ -439,7 +453,8 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
   </section>
 
   <!-- ============ QUIZ ============ -->
-  <section id="view-quiz" class="hidden">
+  <section id="view-quiz" class="hidden" role="tabpanel"
+           aria-labelledby="tab-quiz" tabindex="-1">
     <div class="progressbar"><div id="qProgress"></div></div>
     <div class="card" id="qCard">
       <div class="rail"></div>
@@ -468,6 +483,7 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
           <div id="qNote"></div>
         </div>
         <div id="gradeArea"></div>
+        <div id="reportArea"></div>
       </div>
       <div class="qfoot">
         <button class="btn ghost small" id="backBtn" onclick="goBack()">← Previous</button>
@@ -497,7 +513,8 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
   </section>
 
   <!-- ============ PROGRESS ============ -->
-  <section id="view-progress" class="hidden">
+  <section id="view-progress" class="hidden" role="tabpanel"
+           aria-labelledby="tab-progress" tabindex="-1">
     <div class="card">
       <h2>Overall</h2>
       <div class="statgrid" id="overallStats"></div>
@@ -528,7 +545,8 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
   </section>
 
   <!-- ============ NOTES ============ -->
-  <section id="view-notes" class="hidden">
+  <section id="view-notes" class="hidden" role="tabpanel"
+           aria-labelledby="tab-notes" tabindex="-1">
     <div class="pills" id="notePills"></div>
     <div class="card notes" id="noteBody"></div>
     <div class="rowbtns" style="margin-bottom:20px">
@@ -723,6 +741,239 @@ function toggleTheme(){
   try{ t = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
   document.documentElement.setAttribute('data-theme', t);
 })();
+
+/* ===================== CONTACT =====================
+   Set this to an address only once replies to it actually reach a person.
+   Resend sends but does not receive, so until Cloudflare Email Routing
+   forwards the apex, a mailto: link is worse than no link: it looks like a
+   way through and then bounces in silence. Empty means the interface simply
+   does not claim a route exists. */
+const CONTACT_EMAIL = '';
+
+function contactSentence(lead){
+  if(!CONTACT_EMAIL) return '';
+  return ' ' + lead + ' <a href="mailto:' + CONTACT_EMAIL + '">' + CONTACT_EMAIL + '</a>.';
+}
+
+/* ===================== SIGNING IN =====================
+   There is one sign-in form and it is on the landing page. This page carried a
+   second copy, which drifted: it was still offering magic links long after the
+   landing page had moved to passwords, so anyone arriving on a shared link got
+   the worse route. Sending people to the one form means there is only ever one
+   to keep right. The destination rides along so a link to a particular topic
+   still lands on that topic afterwards. */
+function goSignIn(){
+  const here = location.pathname.split('/').pop() + location.search;
+  location.href = 'index.html?next=' + encodeURIComponent(here);
+}
+
+/* ===================== WHEN LOADING FAILS =====================
+   "Could not load the topic list" told a visitor nothing they could act on.
+   The two causes that actually happen look quite different from the outside:
+   the connection is down, or the database is asleep. navigator.onLine settles
+   the first without guessing about the second. */
+function topicErrorHtml(){
+  const offline = navigator.onLine === false;
+  return '<div class="card" style="margin:0">' +
+    '<h2 style="margin-top:0">' +
+      (offline ? 'You appear to be offline' : 'The topic list did not load') + '</h2>' +
+    '<p class="small">' + (offline
+      ? 'Topics you have already opened will still work. Anything else needs a connection.'
+      : 'This is usually temporary. Waiting a moment and trying again normally sorts it.') +
+    contactSentence('If it keeps happening,') + '</p>' +
+    '<div class="rowbtns"><button class="btn" onclick="location.reload()">Try again</button></div>' +
+    '</div>';
+}
+
+/* ===================== REPORTING A QUESTION =====================
+   The feedback channel this had no other version of. One tap, straight into a
+   table, no form to fill in. Shown only once the answer is on screen, because
+   that is the moment anyone notices something is wrong with it. */
+const REPORT_REASONS = [
+  ['wrong', 'The answer looks wrong'],
+  ['unclear', 'The question is unclear'],
+  ['typo', 'Spelling or typo'],
+  ['other', 'Something else']
+];
+
+function renderReport(q){
+  const slot = document.getElementById('reportArea');
+  if(!slot) return;
+  slot.innerHTML =
+    '<button class="reportlink" type="button" onclick="openReport()">' +
+    'Something wrong with this question?</button>';
+  slot.dataset.qid = q.id;
+  slot.dataset.done = '';
+}
+
+function openReport(){
+  const slot = document.getElementById('reportArea');
+  slot.innerHTML =
+    '<div class="reportbox">' +
+      '<p class="small" style="margin:0 0 8px">What is wrong with it?</p>' +
+      '<div class="rowbtns">' +
+        REPORT_REASONS.map(function(r){
+          return '<button class="btn ghost" type="button" onclick="sendReport(\'' + r[0] + '\')">' +
+                 r[1] + '</button>';
+        }).join('') +
+      '</div>' +
+      '<p class="small muted" id="reportStatus" style="margin:9px 0 0"></p>' +
+    '</div>';
+}
+
+async function sendReport(reason){
+  const slot = document.getElementById('reportArea');
+  const status = document.getElementById('reportStatus');
+  if(slot.dataset.done) return;
+  slot.dataset.done = '1';
+  if(status) status.textContent = 'Sending\u2026';
+  try{
+    const { error } = await sb.from('reports').insert({
+      unit: BANK.unit,
+      question_id: String(slot.dataset.qid),
+      reason: reason
+    });
+    /* 23505 is the unique violation: they have flagged this one before. That is
+       not a failure worth showing as one. */
+    if(error && error.code !== '23505') throw error;
+    slot.innerHTML = '<p class="small muted" style="margin:0">' +
+      'Thanks \u2014 that has been passed on.</p>';
+  }catch(e){
+    slot.dataset.done = '';
+    if(status) status.textContent = 'That did not send. Have another go in a moment.';
+  }
+}
+
+/* ===================== TABS, FOCUS AND SHARING ===================== */
+
+/* Arrow-key movement between tabs, which is what a tablist is expected to do
+   once it claims the role. The roving tabindex means Tab enters the strip
+   once and then moves on, rather than stopping at all three. */
+function tabKey(ev){
+  const keys = {ArrowLeft:-1, ArrowRight:1, Home:'first', End:'last'};
+  if(!(ev.key in keys)) return;
+  ev.preventDefault();
+  const tabs = [...document.querySelectorAll('nav[role="tablist"] [role="tab"]')];
+  const at = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true');
+  const step = keys[ev.key];
+  const to = step === 'first' ? 0
+           : step === 'last'  ? tabs.length - 1
+           : (at + step + tabs.length) % tabs.length;
+  tabs[to].click();
+  tabs[to].focus();
+}
+
+/* Called by showTab(). Keeping the tabindex in step with aria-selected is the
+   half that is easy to forget, and without it the strip becomes a tab stop
+   for every button again. */
+function syncTabFocus(which){
+  document.querySelectorAll('nav[role="tablist"] [role="tab"]').forEach(t => {
+    t.setAttribute('tabindex', t.id === 'tab-' + which ? '0' : '-1');
+  });
+}
+
+/* Sharing a topic is how one student passes it to another, and the native
+   sheet is a single tap on a phone. Desktop browsers mostly lack it, so the
+   fallback copies the address instead and says so. */
+async function shareTopic(){
+  const btn = document.getElementById('shareBtn');
+  const title = (typeof BANK !== 'undefined' && BANK) ? BANK.unit_title : 'Revision';
+  const data = {title: title, text: 'Revision questions on ' + title, url: location.href};
+  try{
+    if(navigator.share){ await navigator.share(data); return; }
+    await navigator.clipboard.writeText(location.href);
+    if(btn){
+      const was = btn.textContent;
+      btn.textContent = 'Link copied';
+      setTimeout(() => { btn.textContent = was; }, 1800);
+    }
+  }catch(e){ /* a cancelled share sheet lands here; nothing to report */ }
+}
+
+/* ===================== RESUMING A SESSION =====================
+   Per-question progress was already saved on every answer, but the session
+   itself was not, so closing the tab part-way through dropped you back at the
+   setup screen with the queue lost. This keeps the queue and the position.
+
+   It is deliberately localStorage rather than Supabase: a half-finished
+   session is tied to the device you were using, and syncing it would mean one
+   device could yank the queue out from under another mid-question. */
+const SESSION_TTL = 36e5 * 12;          // 12 hours; older than that, start fresh
+function sessionKey(){ return 'gcsebio_sess_' + (BANK ? BANK.unit : 'none'); }
+
+function saveSession(){
+  if(!session) return;
+  try{
+    localStorage.setItem(sessionKey(), JSON.stringify({
+      saved: Date.now(),
+      ids: session.list.map(q => q.id),
+      state: {i:session.i, right:session.right, partial:session.partial,
+              wrong:session.wrong, marks:session.marks, possible:session.possible,
+              missed:session.missed, climbed:session.climbed, slipped:session.slipped,
+              held:session.held, mastered:session.mastered}
+    }));
+  }catch(e){ /* a full or disabled store is not worth interrupting anyone over */ }
+}
+function clearSession(){
+  try{ localStorage.removeItem(sessionKey()); }catch(e){}
+}
+
+/* Returns null unless there is a saved session that is recent, unfinished, and
+   still refers to questions this bank actually has — a bank can be edited
+   between sittings, and a stale id would break the first render. */
+function savedSession(){
+  let raw;
+  try{ raw = localStorage.getItem(sessionKey()); }catch(e){ return null; }
+  if(!raw) return null;
+  let s;
+  try{ s = JSON.parse(raw); }catch(e){ clearSession(); return null; }
+  if(!s || !s.ids || !s.state || Date.now() - (s.saved || 0) > SESSION_TTL){
+    clearSession();
+    return null;
+  }
+  const byId = {};
+  BANK.questions.forEach(q => { byId[q.id] = q; });
+  const list = s.ids.map(id => byId[id]).filter(Boolean);
+  if(list.length !== s.ids.length || s.state.i >= list.length){
+    clearSession();
+    return null;
+  }
+  return {list: list, state: s.state};
+}
+
+function resumeSession(){
+  const saved = savedSession();
+  if(!saved) return;
+  session = Object.assign(
+    {list: saved.list, shown:null, history:[], reviewing:null}, saved.state);
+  /* Deliberately not showTab('quiz'): that routes through showSetup(), which
+     sets session to null - clearing the thing this function has just spent
+     its whole body restoring. */
+  ['quiz','notes','progress'].forEach(x =>
+    document.getElementById('tab-' + x).setAttribute('aria-selected', x === 'quiz'));
+  syncTabFocus('quiz');
+  showView('quiz');
+  renderQuestion();
+}
+
+/* Drawn on the setup screen when there is something to come back to. */
+function renderResume(){
+  const slot = document.getElementById('resumeSlot');
+  if(!slot) return;
+  const saved = savedSession();
+  if(!saved){ slot.innerHTML = ''; return; }
+  const left = saved.list.length - saved.state.i;
+  slot.innerHTML =
+    '<div class="resume-card">' +
+      '<div><strong>You have a session in progress.</strong>' +
+        '<div class="small muted">' + left + ' question' + (left === 1 ? '' : 's') +
+        ' left of ' + saved.list.length + '.</div></div>' +
+      '<div class="rowbtns">' +
+        '<button class="btn" onclick="resumeSession()">Carry on</button>' +
+        '<button class="btn ghost" onclick="clearSession();renderResume()">Start again</button>' +
+      '</div>' +
+    '</div>';
+}
 
 /* ===================== TEXT SIZE ===================== */
 const ZOOM_KEY = 'gcsebio_textsize';
@@ -950,6 +1201,7 @@ function drawLegend(id){
 /* ===================== SESSION ===================== */
 function startSessionWith(list){
   session = {list, i:0, shown:null, right:0, partial:0, wrong:0, marks:0, possible:0, missed:[], history:[], reviewing:null, climbed:0, slipped:0, held:0, mastered:0};
+  saveSession();
   progress.sessions = (progress.sessions || 0) + 1;
   save();
   ['quiz','notes','progress'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === 'quiz'));
@@ -1193,6 +1445,7 @@ function revealAnswer(skipped){
 
 function showAfter(q, written){
   document.getElementById('qAnswer').innerHTML = answerHtml(q);
+  renderReport(q);
   const noteBox = document.getElementById('qNoteBox');
   if(q.explanatory_note){
     document.getElementById('qNote').textContent = q.explanatory_note;
@@ -1239,6 +1492,7 @@ function grade(result, fraction){
   else session.held++;
   if(r.box >= MAX_BOX && boxBefore < MAX_BOX){ session.mastered++; celebrate(q); }
   bumpDailyCount();   // every answered question counts, right or wrong
+  saveSession();
   save();
 
   session.history.push({q, result, shown: session.shown});
@@ -1289,6 +1543,7 @@ function quitSession(){
 }
 
 function endSession(){
+  clearSession();
   const s = session;
   const answered = s.right + s.partial + s.wrong;
   const pct = answered ? Math.round((s.right + s.partial * 0.5) / answered * 100) : 0;
@@ -1500,6 +1755,7 @@ function showView(v){
 }
 function showTab(t){
   ['quiz','notes','progress'].forEach(x => document.getElementById('tab-' + x).setAttribute('aria-selected', x === t));
+  syncTabFocus(t);
   if(t === 'quiz') showSetup();
   else if(t === 'notes'){ renderNotes(); showView('notes'); }
   else { renderProgress(); showView('progress'); }
@@ -1508,12 +1764,43 @@ function showSetup(){
   session = null;
   buildSubtopicList();
   drawPlate('platePreview', BANK.questions);
+  renderResume();
   showView('setup');
 }
 document.addEventListener('keydown', e => {
+  /* Escape first, because it should work from anywhere rather than only on the
+     quiz tab. On the hosted site it steps back to the topic list; standalone
+     there is nowhere to step back to and it does nothing. */
+  if(e.key === 'Escape'){
+    const topics = document.getElementById('view-topics');
+    if(topics && !topics.classList.contains('hidden')) return;
+    if(typeof showTopics === 'function' && document.getElementById('topicsBtn')){
+      e.preventDefault();
+      showTopics();
+    }
+    return;
+  }
+
   if(document.getElementById('view-quiz').classList.contains('hidden')) return;
+
+  /* Nothing below should fire while someone is typing an answer. */
+  const el = document.activeElement;
+  if(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+
   const opts = document.querySelectorAll('#qOptions .option:not([disabled])');
   if(opts.length && '123456'.includes(e.key) && opts[+e.key - 1]){ opts[+e.key - 1].click(); return; }
+
+  /* Self-marking is the most repeated click in the whole app and had no key.
+     The letters sit under the left hand and match the words on the buttons. */
+  const grades = {g:'yes', y:'yes', p:'part', m:'no', n:'no'};
+  const key = e.key.toLowerCase();
+  if(key in grades){
+    const want = grades[key];
+    const btn = document.querySelector('#gradeArea .g-' +
+      (want === 'yes' ? 'yes' : want === 'no' ? 'no' : 'part'));
+    if(btn){ e.preventDefault(); btn.click(); return; }
+  }
+
   if(e.key === 'Enter'){
     const cont = document.getElementById('contBtn') || document.querySelector('#revealArea button');
     if(cont){ e.preventDefault(); cont.click(); }
@@ -1530,20 +1817,6 @@ function gate(view){
   document.getElementById('signOutBtn').style.display = view === 'loading' || view === 'auth' ? 'none' : '';
   document.getElementById('topicsBtn').style.display = 'none';
 }
-async function sendMagicLink(){
-  const email = document.getElementById('authEmail').value.trim();
-  const status = document.getElementById('authStatus');
-  if(!email || !email.includes('@')){ status.textContent = 'Enter a valid email address.'; return; }
-  const btn = document.getElementById('authBtn');
-  btn.disabled = true; status.textContent = 'Sending…';
-  const { error } = await sb.auth.signInWithOtp({
-    email, options: { emailRedirectTo: location.origin + location.pathname + location.search }
-  });
-  btn.disabled = false;
-  status.textContent = error
-    ? 'Could not send the link: ' + error.message
-    : 'Check your email — the link signs you straight in. It may be in spam.';
-}
 async function signOut(){
   await sb.auth.signOut();
   location.href = location.pathname;
@@ -1559,7 +1832,7 @@ async function showTopicsInline(){
   el.innerHTML = '<p class="muted small">Loading topics…</p>';
   const { data, error } = await sb.from('catalog').select('*').order('sort_order');
   if(error || !data || !data.length){
-    el.innerHTML = '<p class="muted small">Could not load the topic list.</p>';
+    el.innerHTML = topicErrorHtml();
     return;
   }
   const HUE5 = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
@@ -1646,7 +1919,17 @@ async function boot(){
 
   await loadProgress();
   await loadOtherUnitCounts();
+  { const s = document.getElementById('shareBtn'); if(s) s.style.display = ''; }
   startApp();
+}
+
+/* Offline. Registered on both pages so it takes effect whichever one a
+   student opens first, and quiet on failure either way: a service worker
+   problem must never be the reason the page does not load. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
 }
 
 sb.auth.onAuthStateChange((event) => {
