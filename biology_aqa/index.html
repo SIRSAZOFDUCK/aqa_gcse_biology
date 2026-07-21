@@ -1100,11 +1100,56 @@
       <section id="v-topics" style="display:none">
         <section class="hero">
           <div class="hero-copy">
-            <p class="eyebrow">Biology 8461</p>
+            <p class="eyebrow">AQA Biology 8461</p>
             <h2 class="display">Choose a topic and start revising.</h2>
             <p id="topicsIntro">Each topic has interactive questions, full mark schemes and revision notes.
                Your progress saves itself against your account, so you can stop mid-session
                and pick up later &mdash; on this device or any other.</p>
+          </div>
+        </section>
+
+        <!-- ============ SIGN IN ============
+             Sits here, above the 22 topics rather than below them, because
+             below them meant scrolling past the whole specification to find
+             it. Nested inside v-topics rather than left as a sibling so that
+             it lands between the hero and the list without reordering
+             anything: show() sets display on this section by id, so nesting
+             changes nothing about how it is switched.
+
+             One dependency that comes with that: show('auth') on its own
+             would now hide this along with its parent. Nothing calls it —
+             browse shows both, topics shows this hidden — but if a state
+             ever needs the form without the list, move it back out first. -->
+      <!-- ============ SIGN IN ============ -->
+        <section id="v-auth" style="display:none">
+          <div class="hero">
+            <div class="hero-copy">
+              <p class="eyebrow">AQA Biology 8461</p>
+              <h2 class="display" id="authHeading">Sign in to start revising.</h2>
+              <p id="authIntro">Enter your email and password.</p>
+              <div style="margin-top:20px;max-width:380px">
+                <input type="email" id="authEmail" placeholder="Email address"
+                       autocomplete="email" inputmode="email" class="fld">
+                <div class="pwfield">
+                  <input type="password" id="authPass" placeholder="Password"
+                         autocomplete="current-password" class="fld">
+                  <button type="button" class="pw-toggle" onclick="togglePw('authPass', this)">Show</button>
+                </div>
+                <div class="pwfield" id="authPass2Wrap" style="display:none">
+                  <input type="password" id="authPass2" placeholder="Confirm password"
+                         autocomplete="new-password" class="fld">
+                  <button type="button" class="pw-toggle" onclick="togglePw('authPass2', this)">Show</button>
+                </div>
+                <button class="theme-btn primary" id="authBtn" onclick="submitAuth()"
+                        style="margin-top:12px">Sign in</button>
+                <p class="notice" id="authStatus"></p>
+                <p class="notice">
+                  <a href="#" id="modeLink" onclick="toggleMode(event)">Create an account</a>
+                  &nbsp;&middot;&nbsp;
+                  <a href="#" onclick="emailLink(event)">Email me a sign-in link instead</a>
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -1116,39 +1161,6 @@
           <span id="topicCount"></span>
         </div>
         <div id="sections"></div>
-      </section>
-
-      <!-- ============ SIGN IN ============ -->
-      <section id="v-auth" style="display:none">
-        <div class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">Biology 8461</p>
-            <h2 class="display" id="authHeading">Sign in to start revising.</h2>
-            <p id="authIntro">Enter your email and password.</p>
-            <div style="margin-top:20px;max-width:380px">
-              <input type="email" id="authEmail" placeholder="Email address"
-                     autocomplete="email" inputmode="email" class="fld">
-              <div class="pwfield">
-                <input type="password" id="authPass" placeholder="Password"
-                       autocomplete="current-password" class="fld">
-                <button type="button" class="pw-toggle" onclick="togglePw('authPass', this)">Show</button>
-              </div>
-              <div class="pwfield" id="authPass2Wrap" style="display:none">
-                <input type="password" id="authPass2" placeholder="Confirm password"
-                       autocomplete="new-password" class="fld">
-                <button type="button" class="pw-toggle" onclick="togglePw('authPass2', this)">Show</button>
-              </div>
-              <button class="theme-btn primary" id="authBtn" onclick="submitAuth()"
-                      style="margin-top:12px">Sign in</button>
-              <p class="notice" id="authStatus"></p>
-              <p class="notice">
-                <a href="#" id="modeLink" onclick="toggleMode(event)">Create an account</a>
-                &nbsp;&middot;&nbsp;
-                <a href="#" onclick="emailLink(event)">Email me a sign-in link instead</a>
-              </p>
-            </div>
-          </div>
-        </div>
       </section>
 
       <!-- ============ NO ACCESS ============ -->
