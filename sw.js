@@ -4,7 +4,8 @@
    got you an icon and a page that failed the moment the wifi did, which is
    most of what school wifi does.
 
-   What it buys: the two pages and their icons load offline. Question banks are
+   What it buys: the picker, the subject landing page, the engine and their
+   icons all load offline. Question banks are
    already cached in localStorage by the engine, so a topic opened once works
    with no connection at all. Progress made offline is written to localStorage
    and syncs the next time Supabase is reachable.
@@ -22,7 +23,7 @@
    To force every client onto a fresh copy, change CACHE_VERSION below.
 */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v3';
 const CACHE = 'retrieve-' + CACHE_VERSION;
 
 /* Without these two there is no offline site, so a failure to cache them
@@ -30,7 +31,8 @@ const CACHE = 'retrieve-' + CACHE_VERSION;
 const ESSENTIAL = [
   './',
   './index.html',
-  './quiz.html'
+  './quiz.html',
+  './biology_aqa/'
 ];
 
 /* These improve things but none of them is worth losing offline support over.
@@ -74,6 +76,18 @@ function isSupabase(url){
   return url.hostname.endsWith('.supabase.co');
 }
 
+/* Which cached page to show when a navigation fails and nothing matching is
+   in the cache. The root is the subject picker now, so falling back to it
+   from inside a subject would answer "where were you going?" with "pick a
+   subject" - technically a page, but a step backwards from where they were.
+   Anything under a subject folder falls back to that subject's landing page
+   instead, which at least lists the topics they already have offline. */
+function fallbackFor(req){
+  return new URL(req.url).pathname.startsWith('/biology_aqa/')
+    ? './biology_aqa/'
+    : './index.html';
+}
+
 self.addEventListener('fetch', event => {
   const req = event.request;
 
@@ -93,7 +107,7 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE).then(c => c.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
+        .catch(() => caches.match(req).then(hit => hit || caches.match(fallbackFor(req))))
     );
     return;
   }

@@ -3,19 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Retrieve GCSE — free interactive revision quizzes and notes covering every topic in AQA GCSE Biology (8461), for Foundation and Higher tier. Try a topic instantly, no sign-up needed.">
+  <script>
+(function () {
+  var h = location.hash, q = location.search;
+  if (/access_token|error_code|error_description|type=/.test(h)
+      || /[?&]code=/.test(q)) {
+    location.replace('/biology_aqa/' + q + h);
+  }
+})();
+  </script>
+  <title>Retrieve GCSE — free GCSE science revision quizzes</title>
+  <meta name="description" content="Free retrieval-practice quizzes for GCSE science. Every topic in AQA GCSE Biology, with exam-style questions, mark schemes and revision notes. Chemistry and Physics on the way.">
+  <link rel="canonical" href="https://retrievegcse.co.uk/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Retrieve GCSE">
-  <meta property="og:title" content="Retrieve GCSE — AQA Biology revision quizzes">
-  <meta property="og:description" content="Every topic in AQA GCSE Biology (8461), with instant marking, spaced repetition and revision notes. Try a topic free, no sign-up needed.">
+  <meta property="og:title" content="Retrieve GCSE — free GCSE science revision quizzes">
+  <meta property="og:description" content="Free retrieval-practice quizzes for GCSE science. Every topic in AQA GCSE Biology, with exam-style questions, mark schemes and revision notes. Chemistry and Physics on the way.">
+  <meta property="og:url" content="https://retrievegcse.co.uk/">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Retrieve GCSE">
-  <meta name="twitter:description" content="Free interactive quizzes covering every topic in AQA GCSE Biology (8461). Try a topic instantly.">
-  <title>Retrieve GCSE — AQA Biology revision quizzes</title>
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="icon" href="favicon.ico" sizes="48x48">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="manifest" href="manifest.json">
+  <meta name="twitter:title" content="Retrieve GCSE — free GCSE science revision quizzes">
+  <meta name="twitter:description" content="Free retrieval-practice quizzes for GCSE science. Every topic in AQA GCSE Biology, with exam-style questions, mark schemes and revision notes. Chemistry and Physics on the way.">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1f7a5c">
   <style>
     :root {
@@ -560,6 +571,32 @@
     }
   
     
+    /* ---- the pre-boot topic list ----
+       On screen for a moment before the catalog arrives, then permanently for
+       anyone without JavaScript. Styled with the page's own tokens, quietly:
+       it is scaffolding, not a second design, and it must not flash something
+       that looks different from the grid replacing it. */
+    .preboot { margin: 0 0 8px; }
+    .preboot h2 { margin: 0 0 6px; font-size: 1.35rem; }
+    .preboot > p { margin: 0 0 22px; color: var(--ink-soft); max-width: 62ch; }
+    .preboot ul { list-style: none; margin: 0; padding: 0; display: grid;
+                  gap: 12px; }
+    .preboot li {
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--algae);
+      border-radius: var(--radius);
+      background: var(--card);
+    }
+    .preboot li a { color: var(--ink); font-weight: 650; text-decoration: none; }
+    .preboot li a:hover, .preboot li a:focus-visible { text-decoration: underline; }
+    .preboot li span { display: block; margin-top: 2px; font-size: .82rem;
+                       color: var(--ink-soft); }
+    .preboot li p { margin: 8px 0 0; font-size: .92rem; color: var(--ink-soft); }
+    @media (min-width: 720px) {
+      .preboot ul { grid-template-columns: 1fr 1fr; }
+    }
+
     /* ---- added: sign-in fields, and per-topic progress ---- */
     .fld {
       width: 100%;
@@ -908,9 +945,35 @@
     .topic-card.locked .launch {
       color: var(--ink-soft);
     }
+
+    /* ---- subject picker ----
+       Built on .topic-card so the picker and the topic grid behind it are
+       visibly the same product. --accent is the card's own variable; setting
+       it per subject is how the topic grid already colours its 22 cards. */
+    .subject-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 760px) {
+      .subject-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .subject-card .board {
+      margin: 0 0 10px;
+      font-size: .82rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .subject-card h2 { margin: 0 0 8px; font-size: 1.45rem; }
+    .subject-card > p { margin: 0; color: var(--ink-soft); }
+    /* Pushes the footer line to the bottom whatever the blurb length, so the
+       three cards read as a row rather than three different heights. */
+    .subject-card .launch { margin-top: auto; }
+    .subject-card.soon { cursor: default; }
+    .subject-card.soon .launch { color: var(--ink-soft); }
 </style>
 </head>
-
 <body>
   <div class="wrap">
     <header>
@@ -922,698 +985,77 @@
       </div>
       <div class="heading">
         <h1 class="display">Retrieve GCSE</h1>
-        <div class="sub">AQA GCSE Biology 8461</div>
+        <div class="sub">Free GCSE revision quizzes</div>
       </div>
       <div class="header-tools">
-        <div class="zoom" role="group" aria-label="Text size">
-          <button class="a-sm" id="zoomOut" type="button" onclick="stepZoom(-1)"
-                  title="Smaller text" aria-label="Smaller text">A</button>
-          <span class="sep" aria-hidden="true"></span>
-          <button class="a-lg" id="zoomIn" type="button" onclick="stepZoom(1)"
-                  title="Bigger text" aria-label="Bigger text">A</button>
-        </div>
-        <button class="theme-btn" id="themeBtn" type="button" onclick="toggleTheme()">Dark mode</button>
-        <button class="theme-btn" id="changePassBtn" type="button" onclick="openPwModal(event)" style="display:none">Change password</button>
-        <button class="theme-btn" id="signOutBtn" type="button" onclick="signOut()" style="display:none">Sign out</button>
+        <button class="theme-btn" id="themeBtn" type="button"
+                onclick="toggleTheme()">Dark mode</button>
       </div>
     </header>
 
     <main>
-      <section id="v-loading">
-        <div class="hero"><div class="hero-copy"><p>Loading&hellip;</p></div></div>
-      </section>
-
-      <!-- ============ TOPICS ============ -->
-      <section id="v-topics" style="display:none">
-        <section class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">Biology 8461</p>
-            <h2 class="display">Choose a topic and start revising.</h2>
-            <p id="topicsIntro">Each topic has interactive questions, full mark schemes and revision notes.
-               Your progress saves itself against your account, so you can stop mid-session
-               and pick up later &mdash; on this device or any other.</p>
-          </div>
-        </section>
-
-        <div id="dailyBar"></div>
-        <div id="dueBar"></div>
-
-        <div class="section-heading">
-          <h2>Specification sections</h2>
-          <span id="topicCount"></span>
-        </div>
-        <div id="sections"></div>
-      </section>
-
-      <!-- ============ SIGN IN ============ -->
-      <section id="v-auth" style="display:none">
-        <div class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">Biology 8461</p>
-            <h2 class="display" id="authHeading">Sign in to start revising.</h2>
-            <p id="authIntro">Enter your email and password.</p>
-            <div style="margin-top:20px;max-width:380px">
-              <input type="email" id="authEmail" placeholder="Email address"
-                     autocomplete="email" inputmode="email" class="fld">
-              <div class="pwfield">
-                <input type="password" id="authPass" placeholder="Password"
-                       autocomplete="current-password" class="fld">
-                <button type="button" class="pw-toggle" onclick="togglePw('authPass', this)">Show</button>
-              </div>
-              <div class="pwfield" id="authPass2Wrap" style="display:none">
-                <input type="password" id="authPass2" placeholder="Confirm password"
-                       autocomplete="new-password" class="fld">
-                <button type="button" class="pw-toggle" onclick="togglePw('authPass2', this)">Show</button>
-              </div>
-              <button class="theme-btn primary" id="authBtn" onclick="submitAuth()"
-                      style="margin-top:12px">Sign in</button>
-              <p class="notice" id="authStatus"></p>
-              <p class="notice">
-                <a href="#" id="modeLink" onclick="toggleMode(event)">Create an account</a>
-                &nbsp;&middot;&nbsp;
-                <a href="#" onclick="emailLink(event)">Email me a sign-in link instead</a>
-              </p>
-            </div>
-          </div>
+      <section class="hero">
+        <div class="hero-copy">
+          <h2 class="display">Pick a subject</h2>
+          <p>3,800 exam-style questions so far. Answer from memory, mark yourself honestly, and the ones you get wrong come back sooner than the ones you get right.</p>
         </div>
       </section>
 
-      <!-- ============ NO ACCESS ============ -->
-      <section id="v-locked" style="display:none">
-        <div class="hero">
-          <div class="hero-copy">
-            <p class="eyebrow">Almost there</p>
-            <h2 class="display">Setting up your account.</h2>
-            <p>You're signed in as <strong id="lockedEmail"></strong>, but your account
-               isn't quite ready yet. This is usually just a short delay right after
-               signing up — wait a moment and check again below.</p>
-            <button class="theme-btn" onclick="location.reload()" style="margin-top:18px">Check again</button>
-          </div>
-        </div>
-      </section>
+      <div class="subject-grid">
+      <a class="topic-card subject-card" href="/biology_aqa/"
+         style="--accent: var(--algae)">
+      <p class="board">AQA GCSE Biology 8461</p>
+      <h2 class="display">Biology</h2>
+      <p>All 22 topics on the specification, 3,800 exam-style questions with full mark schemes and revision notes.</p>
+      <div class="launch">
+        <span>Start revising</span>
+        <span class="launch-arrow" aria-hidden="true">&rarr;</span>
+      </div>
+      </a>
+      <div class="topic-card subject-card soon locked"
+           style="--accent: var(--iodine)">
+      <p class="board">AQA GCSE Chemistry 8462</p>
+      <h2 class="display">Chemistry</h2>
+      <p>Being written now. The questions are the slow part — each one is checked against the specification before it goes in.</p>
+      <div class="launch">
+        <span>Not ready yet</span>
+        
+      </div>
+      </div>
+      <div class="topic-card subject-card soon locked"
+           style="--accent: var(--violet)">
+      <p class="board">AQA GCSE Physics 8463</p>
+      <h2 class="display">Physics</h2>
+      <p>After Chemistry. Same format: answer from memory, mark it honestly, come back to what you got wrong.</p>
+      <div class="launch">
+        <span>Not ready yet</span>
+        
+      </div>
+      </div>
+      </div>
     </main>
 
-    <!-- ============ CHANGE PASSWORD ============ -->
-    <div class="modal-overlay hidden" id="pwModal" onclick="if(event.target === this) closePwModal()">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pwModalTitle">
-        <h3 id="pwModalTitle" class="display">Change password</h3>
-        <div class="pwfield" style="margin-top:14px">
-          <input type="password" id="pwNew" placeholder="New password"
-                 autocomplete="new-password" class="fld">
-          <button type="button" class="pw-toggle" onclick="togglePw('pwNew', this)">Show</button>
-        </div>
-        <div class="pwfield">
-          <input type="password" id="pwConfirm" placeholder="Confirm new password"
-                 autocomplete="new-password" class="fld">
-          <button type="button" class="pw-toggle" onclick="togglePw('pwConfirm', this)">Show</button>
-        </div>
-        <p class="notice" id="pwStatus"></p>
-        <div class="rowbtns">
-          <button class="theme-btn primary" id="pwSaveBtn" onclick="submitPwChange()">Save password</button>
-          <button class="theme-btn" type="button" onclick="closePwModal()">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <footer>
-      <!-- The tally is written into #foot by renderTopics(). Anything that
-           needs to survive that has to live outside it: textContent replaces
-           the lot, and a link in there vanishes the moment topics render. -->
-      <span id="foot">Retrieve GCSE · AQA Biology revision resources</span>
-      <span class="foot-links"><a href="biology_aqa/">Browse all 22 topics</a></span>
-    </footer>
+    <footer>Retrieve GCSE · free revision resources for GCSE science</footer>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.7"></script>
 <script>
-/* ---- fill these in; both are safe to publish ---- */
-const SUPABASE_URL = 'https://eicnlfyrlxhpaulysrwj.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_wl_-8j-Cmu2t1-Q-1Xqxkw_6lHlcGXy';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const root = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
-function applyTheme(t){
-  root.dataset.theme = t;
-  themeBtn.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
-}
-function toggleTheme(){
-  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
-  try{ localStorage.setItem('gcsebio_theme', next); }catch(e){}
-}
 (function(){
-  let t = null;
-  try{ t = localStorage.getItem('gcsebio_theme'); }catch(e){}
-  applyTheme(t || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  var root = document.documentElement, btn = document.getElementById('themeBtn');
+  function apply(t){
+    root.dataset.theme = t;
+    if(btn) btn.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('gcsebio_theme'); } catch(e){}
+  if(!saved && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)
+    saved = 'dark';
+  apply(saved === 'dark' ? 'dark' : 'light');
+  window.toggleTheme = function(){
+    var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('gcsebio_theme', next); } catch(e){}
+  };
 })();
-
-function show(v){
-  ['loading','auth','locked','topics'].forEach(x => {
-    const on = v === 'browse' ? (x === 'auth' || x === 'topics') : (x === v);
-    document.getElementById('v-' + x).style.display = on ? '' : 'none';
-  });
-  const signedIn = (v === 'locked' || v === 'topics');
-  document.getElementById('signOutBtn').style.display = signedIn ? '' : 'none';
-  document.getElementById('changePassBtn').style.display = signedIn ? '' : 'none';
-}
-function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g,
-  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-/* ===================== SIGN IN ===================== */
-/* Password is the main route: instant, works on any device, no trip to an
-   inbox. The emailed link stays as the way back in for a forgotten password. */
-let signingUp = false;
-function toggleMode(e){
-  e.preventDefault();
-  signingUp = !signingUp;
-  document.getElementById('authHeading').textContent =
-    signingUp ? 'Create your account.' : 'Sign in to start revising.';
-  document.getElementById('authIntro').textContent =
-    signingUp ? 'Choose a password of at least 8 characters.'
-              : 'Enter your email and password.';
-  document.getElementById('authPass2Wrap').style.display = signingUp ? '' : 'none';
-  document.getElementById('authPass').setAttribute('autocomplete',
-    signingUp ? 'new-password' : 'current-password');
-  document.getElementById('authBtn').textContent = signingUp ? 'Create account' : 'Sign in';
-  document.getElementById('modeLink').textContent =
-    signingUp ? 'I already have an account' : 'Create an account';
-  document.getElementById('authStatus').textContent = '';
-}
-function say(msg){ document.getElementById('authStatus').textContent = msg; }
-
-function togglePw(id, btn){
-  const el = document.getElementById(id);
-  const showing = el.type === 'password';
-  el.type = showing ? 'text' : 'password';
-  btn.textContent = showing ? 'Hide' : 'Show';
-  btn.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
-}
-
-async function submitAuth(){
-  const email = document.getElementById('authEmail').value.trim();
-  const pass = document.getElementById('authPass').value;
-  const pass2 = document.getElementById('authPass2').value;
-  if(!email.includes('@')) return say('Enter a valid email address.');
-  if(!pass) return say('Enter your password.');
-
-  const btn = document.getElementById('authBtn');
-  btn.disabled = true;
-  try{
-    if(signingUp){
-      if(pass.length < 8){ return say('Use at least 8 characters.'); }
-      if(pass !== pass2){ return say('The two passwords do not match.'); }
-      say('Creating your account\u2026');
-      /* Pass the redirect explicitly rather than relying on the project's
-         Site URL setting, which is easy to get wrong and silently sends
-         people to the wrong page. */
-      const { error } = await sb.auth.signUp({ email, password: pass,
-        options: { emailRedirectTo: location.origin + location.pathname } });
-      if(error) return say(/already|exists|registered/i.test(error.message)
-        ? 'There is already an account with that email. Sign in instead, or use the link below if you have forgotten the password.'
-        : error.message);
-      say('Account created. Signing you in\u2026');
-      const r = await sb.auth.signInWithPassword({ email, password: pass });
-      if(r.error){
-        /* Almost always because email confirmation is switched on: the account
-           exists but has no session yet. Put the form back into sign-in mode
-           rather than leaving the user on a create-account form that has just
-           told them to sign in. */
-        signingUp = true; toggleMode({preventDefault(){}});
-        document.getElementById('authPass').value = '';
-        document.getElementById('authPass2').value = '';
-        say(/confirm/i.test(r.error.message)
-          ? 'Account created. Check your email to confirm the address, then sign in below.'
-          : 'Account created. Now sign in with your email and password.');
-        return;
-      }
-      boot();
-    } else {
-      say('Signing in\u2026');
-      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-      if(error) return say(
-        /invalid/i.test(error.message)
-          ? 'That email and password do not match. If you have forgotten it, use the sign-in link below.'
-          : error.message);
-      boot();
-    }
-  } finally { btn.disabled = false; }
-}
-
-async function emailLink(e){
-  e.preventDefault();
-  const email = document.getElementById('authEmail').value.trim();
-  if(!email.includes('@')) return say('Type your email address first, then click this.');
-  say('Sending\u2026');
-  const { error } = await sb.auth.signInWithOtp({
-    email, options: { emailRedirectTo: location.origin + location.pathname }
-  });
-  say(error ? error.message
-            : 'Check your email — the link signs you in. It may be in your spam folder.');
-}
-
-function openPwModal(e){
-  if(e) e.preventDefault();
-  document.getElementById('pwNew').value = '';
-  document.getElementById('pwConfirm').value = '';
-  document.getElementById('pwNew').type = 'password';
-  document.getElementById('pwConfirm').type = 'password';
-  document.querySelectorAll('#pwModal .pw-toggle').forEach(b => b.textContent = 'Show');
-  document.getElementById('pwStatus').textContent = '';
-  document.getElementById('pwModal').classList.remove('hidden');
-  document.getElementById('pwNew').focus();
-}
-function closePwModal(){
-  document.getElementById('pwModal').classList.add('hidden');
-}
-async function submitPwChange(){
-  const p1 = document.getElementById('pwNew').value;
-  const p2 = document.getElementById('pwConfirm').value;
-  const status = document.getElementById('pwStatus');
-  if(p1.length < 8) return status.textContent = 'Use at least 8 characters.';
-  if(p1 !== p2) return status.textContent = 'The two passwords do not match.';
-  const btn = document.getElementById('pwSaveBtn');
-  btn.disabled = true;
-  status.textContent = 'Saving\u2026';
-  const { error } = await sb.auth.updateUser({ password: p1 });
-  btn.disabled = false;
-  if(error){ status.textContent = 'Could not change it: ' + error.message; return; }
-  status.textContent = 'Password changed.';
-  setTimeout(closePwModal, 1200);
-}
-
-async function signOut(){ await sb.auth.signOut(); location.reload(); }
-
-/* ===================== TEXT SIZE =====================
-   The same setting as the quiz page, under the same key, so a student who
-   sizes the text up once does not lose it moving between the two.
-
-   The quiz page scales a --fs variable because its stylesheet is written in
-   px. This one is 36 rem declarations out of 38, so scaling the root font size
-   is both simpler and the thing rem is actually for. */
-const ZOOM_KEY = 'gcsebio_textsize';
-const ZOOM_STEPS = [0.85, 1, 1.15, 1.3, 1.5];
-let zoomIdx = 1;
-
-function applyZoom(){
-  document.documentElement.style.fontSize = (16 * ZOOM_STEPS[zoomIdx]) + 'px';
-  const out = document.getElementById('zoomOut'), inn = document.getElementById('zoomIn');
-  if(out) out.disabled = zoomIdx === 0;
-  if(inn) inn.disabled = zoomIdx === ZOOM_STEPS.length - 1;
-  try{ localStorage.setItem(ZOOM_KEY, zoomIdx); }catch(e){}
-}
-function stepZoom(dir){
-  zoomIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, zoomIdx + dir));
-  applyZoom();
-}
-(function(){
-  try{
-    const v = parseInt(localStorage.getItem(ZOOM_KEY), 10);
-    if(Number.isInteger(v) && v >= 0 && v < ZOOM_STEPS.length) zoomIdx = v;
-  }catch(e){}
-  document.documentElement.style.fontSize = (16 * ZOOM_STEPS[zoomIdx]) + 'px';
-})();
-
-/* ===================== WHERE THEY WERE HEADED =====================
-   quiz.html sends anyone signed out here with ?next=, so a shared link to a
-   topic survives the detour through sign-in.
-
-   The pattern match is the whole security of it: without it, next= would take
-   any address at all and this page would forward people to it, signed in and
-   trusting. Only a local .html file with a plain query string gets through. */
-function nextDestination(){
-  const raw = new URLSearchParams(location.search).get('next');
-  if(!raw) return null;
-  return /^[A-Za-z0-9_-]+\.html(\?[A-Za-z0-9_=&%.-]*)?$/.test(raw) ? raw : null;
-}
-
-/* ===================== DUE TODAY =====================
-   Progress was only ever shown per topic, so nothing anywhere said "37
-   questions are ready across five topics" - which is the one number that
-   makes spaced repetition work, because it is the reason to come back.
-
-   The rule matches the engine exactly: a question is due if it has no record,
-   or has never been seen, or its due time has passed. Anything else is the two
-   pages disagreeing about what "due" means, which is worse than not showing
-   it. */
-function dueFor(row, questionCount){
-  if(!questionCount) return 0;
-  const recs = (row && row.data && row.data.questions) || {};
-  const now = Date.now();
-  let waiting = 0;
-  Object.values(recs).forEach(r => { if(r && r.seen && r.due > now) waiting++; });
-  /* A bank can lose questions between sittings, leaving records with no
-     question behind them. That would push waiting above the count, so the
-     floor is a real guard rather than a formality. */
-  return Math.max(0, questionCount - waiting);
-}
-
-function renderDue(topics, byUnit){
-  const slot = document.getElementById('dueBar');
-  if(!slot) return;
-  const rows = topics
-    .map(t => ({t: t, due: dueFor(byUnit[t.unit], t.question_count)}))
-    .filter(r => r.due > 0);
-
-  /* Nothing due is the reward for having kept up, not an empty state to
-     apologise for - and on a first visit everything is due, which would make
-     this a restatement of the topic grid directly beneath it. */
-  const total = rows.reduce((s, r) => s + r.due, 0);
-  const started = topics.some(t => byUnit[t.unit]);
-  if(!started || !total){ slot.innerHTML = ''; return; }
-
-  rows.sort((a, b) => b.due - a.due);
-  const top = rows.slice(0, 5);
-  const said = rows.length === 1
-    ? 'ready in one topic'
-    : 'ready across ' + rows.length + ' topics';
-
-  slot.innerHTML =
-    '<div class="due-card">' +
-      '<div class="due-eyebrow">Ready for review</div>' +
-      '<div class="due-figure">' +
-        '<span class="due-now display">' + total + '</span>' +
-        '<span class="due-said">' + said +
-          '. These are the ones the spacing says you are closest to forgetting.</span>' +
-      '</div>' +
-      '<div class="due-list">' +
-        top.map(r =>
-          '<a class="due-chip" href="quiz.html?unit=' + encodeURIComponent(r.t.unit) + '">' +
-            esc(r.t.unit_title) + ' <b>' + r.due + '</b></a>').join('') +
-        (rows.length > top.length
-          ? '<span class="due-chip" style="opacity:.7">and ' +
-            (rows.length - top.length) + ' more</span>'
-          : '') +
-      '</div>' +
-    '</div>';
-}
-
-/* ===================== WHEN LOADING FAILS =====================
-   "Could not load the topic list. Try reloading." named no cause and offered
-   no route out. The two things that actually go wrong look quite different
-   from the outside: no connection, or the free-tier database asleep after
-   seven idle days. */
-function failureHtml(){
-  const offline = navigator.onLine === false;
-  return '<div class="fail-card">' +
-    '<h3>' + (offline ? 'You appear to be offline' : 'The topic list did not load') + '</h3>' +
-    '<p>' + (offline
-      ? 'Topics you have already opened will still work offline. The full list needs a connection.'
-      : 'This is nearly always temporary. Trying again in a moment usually sorts it.') +
-    '</p>' +
-    '<button class="theme-btn primary" type="button" onclick="boot()">Try again</button>' +
-    '</div>';
-}
-
-/* ===================== DAILY GOAL =====================
-   Mirrors the block in quiz.html. Set DAILY_GOAL to false in BOTH files to
-   switch the feature off completely.
-
-   The count is read out of the progress rows this page already fetches, so
-   this adds no extra request. Each topic keeps its own dailyLog; the bar sums
-   the ones stamped with today's date. */
-const DAILY_GOAL = true;
-const GOAL_KEY = 'gcsebio_daily_goal';
-const GOAL_DEFAULT = 20;
-
-/* Local date, not toISOString() — through BST, local midnight is 23:00 UTC the
-   previous day, so for the first hour of each day an ISO date still reports
-   yesterday. Must match todayStr() in quiz.html exactly. */
-function todayStr(){
-  const d = new Date();
-  return d.getFullYear() + '-' +
-         String(d.getMonth() + 1).padStart(2, '0') + '-' +
-         String(d.getDate()).padStart(2, '0');
-}
-function goalTarget(){
-  const v = parseInt(localStorage.getItem(GOAL_KEY), 10);
-  return (Number.isInteger(v) && v > 0) ? v : GOAL_DEFAULT;
-}
-function dailyTotal(rows){
-  const today = todayStr();
-  return (rows || []).reduce((sum, row) => {
-    const l = row.data && row.data.dailyLog;
-    return sum + (l && l.date === today ? (l.count || 0) : 0);
-  }, 0);
-}
-const GOAL_CHOICES = [10, 20, 30, 40, 50];
-
-function renderGoalBar(rows){
-  const bar = document.getElementById('dailyBar');
-  if(!bar) return;
-  if(!DAILY_GOAL){ bar.innerHTML = ''; return; }
-
-  const count = dailyTotal(rows);
-  const target = goalTarget();
-  const done = count >= target;
-  const pct = Math.min(100, Math.round(count / target * 100));
-  const left = target - count;
-
-  /* One line, in the interface's voice, that says what to do next. */
-  const said = done
-    ? '<strong>Goal reached.</strong> Anything more today is a bonus.'
-    : (count === 0
-        ? 'Nothing answered yet today. Pick a topic below to start.'
-        : '<strong>' + left + ' more</strong> to go, across any topic.');
-
-  bar.innerHTML =
-    '<div class="daily-card' + (done ? ' done' : '') + '">' +
-      '<div class="daily-top">' +
-        '<span class="daily-eyebrow">Daily goal' + (done ? ' \u2014 reached' : '') + '</span>' +
-        '<span class="daily-goalsel">' +
-          '<label for="goalSel">Target</label>' +
-          '<select id="goalSel" onchange="setGoal(this.value)">' +
-            GOAL_CHOICES.map(n => '<option value="' + n + '"' +
-              (n === target ? ' selected' : '') + '>' + n + ' a day</option>').join('') +
-          '</select>' +
-        '</span>' +
-      '</div>' +
-      '<div class="daily-figure">' +
-        '<span class="daily-now display">' + count + '</span>' +
-        '<span class="daily-of display">/ ' + target + '</span>' +
-        '<span class="daily-said">' + said + '</span>' +
-      '</div>' +
-      '<div class="daily-track"><div style="width:' + pct + '%"></div></div>' +
-    '</div>';
-}
-/* The rows are stashed so changing the target can redraw without refetching. */
-let goalRows = [];
-function setGoal(v){
-  localStorage.setItem(GOAL_KEY, v);
-  renderGoalBar(goalRows);
-}
-
-/* ===================== TOPIC GRID ===================== */
-const HUES = ['var(--algae)','var(--violet)','var(--iodine)','var(--stain)','#1c6d86'];
-const MAX_BOX = 3;   // must match the quiz engine's ladder height
-
-/* Mastery is the average height of a topic's questions on the four-state
-   ladder — the same figure the quiz's own progress tab shows. */
-function masteryFor(row, questionCount){
-  if(!row || !row.data || !row.data.questions || !questionCount) return 0;
-  let total = 0;
-  Object.values(row.data.questions).forEach(r => {
-    total += Math.min(r.box || 0, MAX_BOX);
-  });
-  return Math.min(100, Math.round(total / (questionCount * MAX_BOX) * 100));
-}
-
-function card(t, accent, pct, opts){
-  opts = opts || {};
-  const free = opts.anon && t.unit === opts.freeUnit;
-  const locked = opts.anon && !free;
-  const a = document.createElement('a');
-  a.className = 'topic-card' + (locked ? ' locked' : '');
-  a.style.setProperty('--accent', accent);
-  if(locked){
-    a.href = '#authEmail';
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      document.getElementById('v-auth').scrollIntoView({behavior:'smooth', block:'start'});
-      document.getElementById('authEmail').focus();
-    });
-  } else if(free){
-    a.href = 'quiz.html?unit=' + encodeURIComponent(t.unit) + '&preview=1';
-  } else {
-    a.href = 'quiz.html?unit=' + encodeURIComponent(t.unit);
-  }
-  const progressBlock = locked ? '' : `
-    <div class="tprog">
-      <div class="tprog-bar"><div style="width:${pct}%"></div></div>
-      <div class="tprog-label">
-        <span>${free ? 'Free preview' : (pct > 0 ? pct + '% mastered' : 'Not started')}</span>
-        <span>${t.question_count} questions</span>
-      </div>
-    </div>`;
-  const launchLabel = locked ? 'Sign in to unlock' : (free ? 'Try it free — no sign-up' : (pct > 0 ? 'Carry on' : 'Start'));
-  a.innerHTML = `
-    <div class="topic-title-row">
-      <div class="topic-number">${t.display_number}</div>
-      <h4 class="display">${esc(t.unit_title)}</h4>
-    </div>
-    <p>${esc(t.blurb || '')}</p>${progressBlock}
-    <div class="launch">
-      <span>${launchLabel}</span>
-      <span class="launch-arrow" aria-hidden="true">&rarr;</span>
-    </div>`;
-  return a;
-}
-
-function progressClass(pct){
-  if(pct <= 0) return 'p-zero';
-  if(pct <= 40) return 'p-low';
-  if(pct <= 80) return 'p-mid';
-  return 'p-high';
-}
-
-function render(topics, progressByUnit, opts){
-  opts = opts || {};
-  document.getElementById('topicCount').textContent = topics.length + ' quizzes available';
-
-  /* Group by AQA section. Matching is done on a normalised key so that two
-     spellings of the same section name can't produce two panels. */
-  const groups = [];
-  topics.forEach(t => {
-    const raw = t.aqa_topic || 'Other';
-    const key = raw.toLowerCase().replace(/\s+/g, ' ').trim();
-    let g = groups.find(g => g.key === key);
-    if(!g){ g = {key, label: raw, items: []}; groups.push(g); }
-    g.items.push(t);
-  });
-
-  const host = document.getElementById('sections');
-  host.innerHTML = '';
-  groups.forEach((g, gi) => {
-    const accent = HUES[gi % HUES.length];
-    const sec = document.createElement('section');
-    sec.className = 'syllabus-section';
-    // In anon-browse mode, open the first section by default so the free
-    // topic is visible without an extra click.
-    const startOpen = opts.anon && gi === 0;
-    sec.dataset.open = startOpen ? 'true' : 'false';
-    sec.style.setProperty('--section-accent', accent);
-    const num = (g.label.match(/^\d+/) || [''])[0];
-    const name = g.label.replace(/^\d+\.\s*/, '');
-    const done = g.items.reduce((s, t) => s + (t._pct || 0), 0) / g.items.length;
-    const progressBadge = opts.anon ? '' :
-      `<span class="syllabus-progress ${progressClass(Math.round(done))}">${Math.round(done)}% mastered</span>`;
-    sec.innerHTML = `
-      <button class="syllabus-toggle" aria-expanded="${startOpen}">
-        <div class="syllabus-number">${num || '&bull;'}</div>
-        <div class="syllabus-toggle-text">
-          <h3 class="display">${esc(name)}</h3>
-          ${progressBadge}
-        </div>
-        <span class="syllabus-count">${g.items.length} quiz${g.items.length > 1 ? 'zes' : ''}</span>
-        <span class="syllabus-chevron" aria-hidden="true">&#9662;</span>
-      </button>
-      <div class="syllabus-body"><div class="syllabus-body-inner">
-        <div class="topic-grid"></div>
-      </div></div>`;
-    const grid = sec.querySelector('.topic-grid');
-    /* The first card in a section takes the section's own colour, then the
-       rest continue round the cycle from there. */
-    g.items.forEach((t, i) => grid.appendChild(
-      card(t, HUES[(gi + i) % HUES.length], t._pct || 0, opts)));
-    sec.querySelector('.syllabus-toggle').addEventListener('click', () => {
-      const open = sec.dataset.open === 'true';
-      sec.dataset.open = open ? 'false' : 'true';
-      sec.querySelector('.syllabus-toggle').setAttribute('aria-expanded', String(!open));
-    });
-    host.appendChild(sec);
-  });
-
-  const qs = topics.reduce((t, x) => t + x.question_count, 0);
-  const ms = topics.reduce((t, x) => t + x.mark_total, 0);
-  if(opts.anon){
-    document.getElementById('foot').textContent =
-      `${topics.length} topics · ${qs} questions · ${ms} marks · sign in to track your mastery`;
-  } else {
-    const overall = topics.length
-      ? Math.round(topics.reduce((s, t) => s + (t._pct || 0), 0) / topics.length) : 0;
-    document.getElementById('foot').textContent =
-      `${topics.length} topics · ${qs} questions · ${ms} marks · ${overall}% mastered overall`;
-  }
-}
-
-/* ===================== BOOT ===================== */
-async function boot(){
-  show('loading');
-  const { data: { session } } = await sb.auth.getSession();
-
-  /* Signed in and sent here from a topic link: hand them straight back. */
-  if(session){
-    const next = nextDestination();
-    if(next){ location.replace(next); return; }
-  }
-
-  if(!session){
-    const { data, error } = await sb.from('catalog').select('*').order('sort_order');
-    if(error || !data || !data.length){
-      document.getElementById('sections').innerHTML = failureHtml();
-      show('browse');
-      return;
-    }
-    const freeUnit = data[0].unit;
-    data.forEach(t => { t._pct = 0; });
-    document.getElementById('topicsIntro').textContent =
-      'Try the first topic free below, no account needed. Sign in or create a free ' +
-      'account to unlock the rest and save your progress as you go.';
-    document.getElementById('authHeading').textContent = 'Unlock all 22 topics.';
-    document.getElementById('authIntro').textContent =
-      'Create a free account to save your progress, or sign in if you already have one.';
-    render(data, {}, {anon: true, freeUnit});
-    show('browse');
-    return;
-  }
-
-  const { data: profile } = await sb.from('profiles').select('has_access').maybeSingle();
-  if(!profile || !profile.has_access){
-    document.getElementById('lockedEmail').textContent = session.user.email || '';
-    show('locked');
-    return;
-  }
-
-  const [cat, prog] = await Promise.all([
-    sb.from('catalog').select('*').order('sort_order'),
-    sb.from('progress').select('unit,data')
-  ]);
-
-  if(cat.error || !cat.data || !cat.data.length){
-    document.getElementById('sections').innerHTML = failureHtml();
-    show('topics');
-    return;
-  }
-  const byUnit = {};
-  (prog.data || []).forEach(r => { byUnit[r.unit] = r; });
-  cat.data.forEach(t => { t._pct = masteryFor(byUnit[t.unit], t.question_count); });
-
-  goalRows = prog.data || [];
-  renderGoalBar(goalRows);
-  renderDue(cat.data, byUnit);
-  render(cat.data, byUnit);
-  show('topics');
-}
-sb.auth.onAuthStateChange(e => { if(e === 'SIGNED_IN') boot(); });
-
-/* ===================== OFFLINE =====================
-   The manifest made this installable; without a worker, installing it got you
-   an icon and a page that failed the moment the wifi did. Registration is
-   deliberately last and deliberately quiet: a failure here must never be the
-   reason the page does not load. */
-if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
-}
-
-document.addEventListener('keydown', e => {
-  const modalOpen = !document.getElementById('pwModal').classList.contains('hidden');
-  if(modalOpen && e.key === 'Escape'){ closePwModal(); return; }
-  if(modalOpen && e.key === 'Enter'){ submitPwChange(); return; }
-  if(e.key === 'Enter' && document.getElementById('v-auth').style.display !== 'none') submitAuth();
-});
-boot();
 </script>
 </body>
 </html>

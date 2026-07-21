@@ -563,6 +563,32 @@
     }
   
     
+    /* ---- the pre-boot topic list ----
+       On screen for a moment before the catalog arrives, then permanently for
+       anyone without JavaScript. Styled with the page's own tokens, quietly:
+       it is scaffolding, not a second design, and it must not flash something
+       that looks different from the grid replacing it. */
+    .preboot { margin: 0 0 8px; }
+    .preboot h2 { margin: 0 0 6px; font-size: 1.35rem; }
+    .preboot > p { margin: 0 0 22px; color: var(--ink-soft); max-width: 62ch; }
+    .preboot ul { list-style: none; margin: 0; padding: 0; display: grid;
+                  gap: 12px; }
+    .preboot li {
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--algae);
+      border-radius: var(--radius);
+      background: var(--card);
+    }
+    .preboot li a { color: var(--ink); font-weight: 650; text-decoration: none; }
+    .preboot li a:hover, .preboot li a:focus-visible { text-decoration: underline; }
+    .preboot li span { display: block; margin-top: 2px; font-size: .82rem;
+                       color: var(--ink-soft); }
+    .preboot li p { margin: 8px 0 0; font-size: .92rem; color: var(--ink-soft); }
+    @media (min-width: 720px) {
+      .preboot ul { grid-template-columns: 1fr 1fr; }
+    }
+
     /* ---- added: sign-in fields, and per-topic progress ---- */
     .fld {
       width: 100%;

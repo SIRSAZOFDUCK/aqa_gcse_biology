@@ -350,7 +350,7 @@ footer{margin-top:26px;font-size:calc(12px * var(--fs));color:var(--ink-soft);te
 
   <div class="previewbanner hidden" id="previewBanner">
     <span>You're trying this topic free, with no account. Sign up to unlock all 22 topics and save your progress.</span>
-    <a class="btn" href="index.html">Create a free account</a>
+    <a class="btn" href="/biology_aqa/" onclick="goSignIn(); return false;">Create a free account</a>
   </div>
 
   <nav role="tablist" aria-label="Topic sections" onkeydown="tabKey(event)">
@@ -764,7 +764,7 @@ function contactSentence(lead){
    still lands on that topic afterwards. */
 function goSignIn(){
   const here = location.pathname.split('/').pop() + location.search;
-  location.href = 'index.html?next=' + encodeURIComponent(here);
+  location.href = '/biology_aqa/?next=' + encodeURIComponent(here);
 }
 
 /* ===================== WHEN LOADING FAILS =====================
@@ -1823,9 +1823,9 @@ async function signOut(){
 }
 
 /* ===================== TOPIC PICKER ===================== */
-/* The topic list lives on index.html, which is the landing page. Anywhere the
+/* The topic list lives at /biology_aqa/, which is the landing page. Anywhere the
    engine would have shown its own picker, it hands back to that instead. */
-function showTopics(){ location.href = 'index.html'; }
+function showTopics(){ location.href = '/biology_aqa/'; }
 async function showTopicsInline(){
   gate('topics');
   const el = document.getElementById('topicList');
@@ -1889,16 +1889,19 @@ async function boot(){
   if(PREVIEW && !SESSION){
     // No account needed for a preview — RLS only allows the anon key to read
     // the one topic this is meant for, so anything else quietly fails below.
-    if(!UNIT){ location.href = 'index.html'; return; }
+    if(!UNIT){ location.href = '/biology_aqa/'; return; }
     try{ BANK = await fetchBank(UNIT); }catch(e){ BANK = null; }
-    if(!BANK){ location.href = 'index.html'; return; }
+    if(!BANK){ location.href = '/biology_aqa/'; return; }
     progress = blankProgress();
     startApp();
     return;
   }
 
   // Sign-in lives on the landing page, so there is one login screen, not two.
-  if(!SESSION){ location.href = 'index.html'; return; }
+  // goSignIn() rather than a bare redirect: it carries where they were
+  // heading, so a shared link to a topic survives the trip through
+  // sign-in and lands them back on that topic rather than on the list.
+  if(!SESSION){ goSignIn(); return; }
 
   const { data: profile } = await sb.from('profiles').select('has_access').maybeSingle();
   if(!profile || !profile.has_access){
@@ -1928,7 +1931,12 @@ async function boot(){
    problem must never be the reason the page does not load. */
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    /* Absolute on purpose. A worker registered from a relative path is
+       scoped to the folder it was fetched from, so if this page ever moves
+       under a subject folder it would quietly stop controlling the rest of
+       the site — offline support would half-work, which is worse than not
+       working, because nothing would say so. */
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
 
